@@ -1,0 +1,28 @@
+{
+  "name": "alexis",
+  "version": "1.0.0",
+  "description": "Empower Your Code, Enlighten Your ALX Path.",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcsavvy/alexis.git"
+  },
+  "keywords": [
+    "alx",
+    "chatbot",
+    "ai",
+    "holberton"
+  ],
+  "author": "Mcsavvy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mcsavvy/alexis/issues"
+  },
+  "homepage": "https://github.com/mcsavvy/alexis#readme",
+  "devDependencies": {
+    "chrome-types": "^0.1.267"
+  }
+}

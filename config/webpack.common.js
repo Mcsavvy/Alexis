@@ -31,7 +31,7 @@ const common = {
       // Help webpack in understanding CSS files imported in .js files
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
       },
       // Help webpack in understanding typescript files
       {

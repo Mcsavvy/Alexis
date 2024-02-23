@@ -13,21 +13,14 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Alexis",
-    "default_popup": "popup.html"
+    "default_title": "Alexis"
   },
-  "permissions": [
-    "storage"
-  ],
+  "permissions": ["storage", "tabs", "sidePanel"],
   "content_scripts": [
     {
-      "matches": [
-        "https://intranet.alxswe.com/*"
-      ],
+      "matches": ["https://intranet.alxswe.com/*"],
       "run_at": "document_idle",
-      "js": [
-        "contentScript.js"
-      ]
+      "js": ["contentScript.js"]
     }
   ]
 }

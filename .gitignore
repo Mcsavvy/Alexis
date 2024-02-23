@@ -13,3 +13,4 @@ npm-debug.log*
 
 # packed files
 /release
+build.zip

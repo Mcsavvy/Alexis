@@ -1,10 +1,9 @@
 'use strict';
 import $ from 'jquery';
-import {
+import scrapeProject ,{
   getProjectDescription,
   getProjectTitle,
   getProjectTags,
-  getProjectTask,
   getProjectTasks,
 } from './scraper';
 
@@ -18,6 +17,9 @@ import {
 
 // For more information on Content Scripts,
 // See https://developer.chrome.com/extensions/content_scripts
+
+// e.g  https://intranet.alxswe.com/projects/100092
+const PROJECT_URL = /https:\/\/intranet.alxswe.com\/projects\/\d+/;
 
 const mobileIcon = `
 <li data-container="body" data-placement="right" data-toggle="tooltip" class="open-alexis" title="" data-original-title="Alexis">
@@ -58,14 +60,11 @@ $(() => {
       console.log('Received response from %s:', response.from, response.response);
     });
   });
-  console.log('Project: ');
-  console.log("Title:", getProjectTitle());
-  console.log("Tags: ", getProjectTags().join(', '));
-  console.log(getProjectDescription());
-  console.log("Tasks: ")
-  for (const task of getProjectTasks()) {
-    console.log(`${task.taskNum}. ${task.taskTitle}`);
-    console.log(task.taskDescription);
+  if (PROJECT_URL.test(window.location.href)) {
+    console.log('This is a project page');
+    const project = scrapeProject();
+    console.log('Project:');
+    console.log(project);
   }
 })
 

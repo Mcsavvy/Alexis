@@ -2,8 +2,6 @@
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const spawn = require('child_process').spawn;
-
 const PATHS = require('./paths');
 
 // used in the module rules and in the stats exlude list
@@ -83,22 +81,6 @@ const common = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-    {
-      apply: (compiler) => {
-        compiler.hooks.afterEmit.tap('AfterEmitPlugin', (compilation) => {
-          // zip the build folder
-          const zip = spawn('zip', ['-r', 'build.zip', 'build'], {
-            cwd: PATHS.root,
-          });
-          zip.stdout.on('data', (data) => {
-            console.log(`${data}`);
-          });
-          zip.on('close', (code) => {
-            console.log(`finished zipping with code ${code}`);
-          });
-        });
-      },
-    },
   ],
 };
 

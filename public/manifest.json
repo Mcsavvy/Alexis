@@ -15,7 +15,10 @@
   "action": {
     "default_title": "Alexis"
   },
-  "permissions": ["storage", "tabs", "sidePanel"],
+  "permissions": ["storage", "tabs", "sidePanel", "cookies"],
+  "host_permissions": [
+    "*://*.futurdevs.tech/"
+  ],
   "content_scripts": [
     {
       "matches": ["https://intranet.alxswe.com/*"],

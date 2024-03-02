@@ -1,11 +1,8 @@
 'use strict';
-
-// With background scripts you can communicate with popup
-// and contentScript files.
-// For more information on background script,
-// See https://developer.chrome.com/extensions/background_pages
-
+import storage from "./storage";
+const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
 const INTRANET_ORIGIN = 'https://intranet.alxswe.com';
+
 
 chrome.storage.session.setAccessLevel({
   accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS',
@@ -41,22 +38,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.message) {
-    console.log('Received message from %s:', message.from, message.message);
-    // Further processing or relaying the message
-
-    // Send a response back to the content script (optional)
-    sendResponse({ response: 'pong', from: 'background' });
-  }
-});
-
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   if (message.update) {
-//     // Find the relevant side panel based on sender or other identifier
-//     chrome.runtime.sendMessage(sender.tab.id, { update: message.update });
-//   }
-// });
 
 // Listen for message from content script
 chrome.runtime.onMessage.addListener((message, sender) => {
@@ -69,3 +50,8 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     chrome.sidePanel.open({ tabId: sender.tab.id });
   }
 });
+
+(async () => {
+  storage.authenticate();
+  chrome.cookies.onChanged.addListener(storage.handleCookieChange);
+})();

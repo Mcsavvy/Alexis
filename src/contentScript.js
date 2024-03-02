@@ -7,19 +7,16 @@ import scrapeProject ,{
   getProjectTasks,
 } from './scraper';
 
-// Content script file will run in the context of web page.
-// With content script you can manipulate the web pages using
-// Document Object Model (DOM).
-// You can also pass information to the parent extension.
 
-// We execute this script by making an entry in manifest.json file
-// under `content_scripts` property
-
-// For more information on Content Scripts,
-// See https://developer.chrome.com/extensions/content_scripts
-
-// e.g  https://intranet.alxswe.com/projects/100092
 const PROJECT_URL = /https:\/\/intranet.alxswe.com\/projects\/\d+/;
+const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
+
+/**
+ * @typedef {{
+ *  project: boolean,
+ *  tasks: boolean[]
+ * }} ProjectExistsResponse
+ */
 
 const mobileIcon = `
 <li data-container="body" data-placement="right" data-toggle="tooltip" class="open-alexis" title="" data-original-title="Alexis">
@@ -49,6 +46,45 @@ console.log(
   `Page title is: '${pageTitle}' - evaluated by Chrome extension's 'contentScript.js' file`
 );
 
+async function saveProject() {
+  const project = scrapeProject();
+  const projectExistsPayload = {
+    project: project.id,
+    tasks: project.tasks.map(task => task.id)
+  };
+  const response = await fetch(`${API_URL}/project/exists`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(projectExistsPayload)
+  });
+  /** @type {ProjectExistsResponse} */
+  const data = await response.json();
+
+  let projectPayload = Object.assign({}, project);
+  projectPayload.tasks = [];
+  if (!data.project) {
+    projectPayload = project;
+  } else {
+    for (let i = 0; i < project.tasks.length; i++) {
+      if (!data.tasks[i]) {
+        projectPayload.tasks.push(project.tasks[i]);
+      }
+    }
+  }
+  if (projectPayload.tasks.length === 0) {
+    return project;
+  }
+  await fetch(`${API_URL}/project/save`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(projectPayload)
+  });
+  return project;
+}
 
 $(() => {
   $(mobileIcon).insertBefore($('ul.nav.navbar-nav > li').first());
@@ -62,9 +98,9 @@ $(() => {
   });
   if (PROJECT_URL.test(window.location.href)) {
     console.log('This is a project page');
-    const project = scrapeProject();
-    console.log('Project:');
-    console.log(project);
+    saveProject().then((project) => {
+      console.log('Project:', project);
+    });
   }
 })
 

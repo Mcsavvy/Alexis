@@ -1,6 +1,25 @@
 import $ from 'jquery';
 import TurndownService from 'turndown';
 
+/**
+ * @typedef {{
+ * id: string
+ * number: string
+ * title: string
+ * description: string
+ * }} Task
+ */
+
+/**
+ * @typedef {{
+ * id: string
+ * title: string
+ * description: string
+ * tags: string[]
+ * tasks: Task[]
+ * }} Project
+ */
+
 const turndown = new TurndownService({
   codeBlockStyle: 'fenced',
   headingStyle: 'atx',
@@ -13,6 +32,12 @@ export function getProjectDescription() {
   const description = $('#project-description.panel > .panel-body').first();
   const markup = turndown.turndown(description.html());
   return markup;
+}
+
+
+export function getProjectID() {
+  // console.log(location);
+  return location.pathname.match(/\/projects\/(\d+)/)[1];
 }
 
 export function getProjectTitle() {
@@ -63,19 +88,20 @@ export function getProjectTasks() {
 }
 
 export default function scrapeProject() {
+  /**@type {Project} */
   const project = {
+    id: getProjectID(),
     title: getProjectTitle(),
     description: getProjectDescription(),
     tags: getProjectTags(),
-    tasks: {},
+    tasks: new Array(),
   };
   const tasks = getProjectTasks();
-  for (const task of tasks) {
-    project.tasks[task.taskId] = {
-      number: task.taskNum,
-      title: task.taskTitle,
-      description: task.taskDescription,
-    };
-  }
+  project.tasks = tasks.map(task => ({
+    id: task.taskId,
+    number: task.taskNum,
+    title: task.taskTitle,
+    description: task.taskDescription,
+  }));
   return project;
 }

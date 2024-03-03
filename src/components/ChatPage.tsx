@@ -5,7 +5,7 @@ import { LuArrowUpSquare } from 'react-icons/lu';
 // import { FiThumbsUp, FiThumbsDown, FiSidebar } from 'react-icons/fi';
 // import { MdContentCopy } from 'react-icons/md';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
-import utils, { UserInfo } from '../utils';
+import { UserInfo, getAccessToken, getUserInfo } from '../utils';
 import Markdown from 'react-markdown';
 
 const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
@@ -60,7 +60,7 @@ export function AIMessage({ message }: { message: string }) {
 }
 
 async function fetchThreads(project: string): Promise<Thread[]> {
-  const accessToken = await utils.getAccessToken();
+  const accessToken = await getAccessToken();
   const response = await fetch(`${API_URL}/chat/threads/${project}`, {
     method: 'GET',
     headers: {
@@ -73,7 +73,7 @@ async function fetchThreads(project: string): Promise<Thread[]> {
 }
 
 async function fetchMessages(thread: string): Promise<ChatMessage[]> {
-  const accessToken = await utils.getAccessToken();
+  const accessToken = await getAccessToken();
   const response = await fetch(`${API_URL}/chat/threads/${thread}/messages`, {
     method: 'GET',
     headers: {
@@ -96,7 +96,7 @@ type ChatMessage = {
 };
 
 async function createThread(project: string): Promise<Thread> {
-  const accessToken = await utils.getAccessToken();
+  const accessToken = await getAccessToken();
   const response = await fetch(`${API_URL}/chat/threads`, {
     method: 'POST',
     headers: {
@@ -111,7 +111,7 @@ async function createThread(project: string): Promise<Thread> {
 }
 
 async function sendMessage(thread: string, message: string): Promise<string> {
-  const accessToken = await utils.getAccessToken();
+  const accessToken = await getAccessToken();
   const config = {
     configurable: {
       //@ts-ignore
@@ -185,7 +185,7 @@ export default function ChatPage() {
       const url = new URL(tab[0].url);
       const projectId = url.pathname.match(/^\/projects\/(\d+)/)[1];
       setProject(projectId);
-      utils.getUserInfo().then((info: UserInfo) => {
+      getUserInfo().then((info: UserInfo) => {
         userInfo.current = info;
       });
     })();

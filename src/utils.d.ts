@@ -6,17 +6,13 @@ export type UserInfo = {
   picture: string | null;
 };
 export type LoginStatusChangeCallback = (loggedIn: boolean) => void;
-interface Utils {
-  onLoginStatusChange: (callback: LoginStatusChangeCallback) => void;
-  getUserInfo: () => Promise<UserInfo | null>;
-  getAccessToken: () => Promise<string | null>;
-  storeAccessToken: (token: string) => Promise<void>;
-  clearUserInfo: () => void;
-  getMe: () => UserInfo;
-  authenticate: () => boolean;
-  isLoggedIn: () => boolean;
-  setLoggedIn: (loggedIn: boolean) => void;
-  handleCookieChange: (changeInfo: chrome.cookies.CookieChangeInfo) => void;
-}
-declare const utils: Utils;
-export default utils
+export const onLoginStatusChange: (callback: LoginStatusChangeCallback) => void;
+export const getMe: () => UserInfo;
+export const getUserInfo: () => Promise<UserInfo | null>;
+export const getAccessToken: () => Promise<string | null>;
+export const storeAccessToken: (token: string) => Promise<void>;
+export const clearUserInfo: () => void;
+export const authenticate: () => boolean;
+export const isLoggedIn: () => boolean;
+export const setLoggedIn: (loggedIn: boolean) => void;
+export const handleCookieChange: (changeInfo: chrome.cookies.CookieChangeInfo) => void;

@@ -12,7 +12,7 @@ const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
  * }} UserInfo
  */
 
-async function getAccessToken() {
+export async function getAccessToken() {
   const cookies = await chrome.cookies.getAll({
     domain: 'alexis.futurdevs.tech',
     name: 'access_token',
@@ -25,7 +25,7 @@ async function getAccessToken() {
 /**
  * @returns {Promise<UserInfo | null>}
  */
-async function getUserInfo() {
+export async function getUserInfo() {
   const userInfo = (await chrome.storage.session.get('userInfo')).userInfo
   console.log('User info:', userInfo)
   return userInfo
@@ -35,13 +35,13 @@ async function getUserInfo() {
  * @param {UserInfo} userInfo
  * @returns {void}
  * */
-function storeUserInfo(userInfo) {
+export function storeUserInfo(userInfo) {
   chrome.storage.session.set({ userInfo })
   console.log('User info stored:', userInfo)
 }
 
 
-async function clearUserInfo() {
+export async function clearUserInfo() {
   await chrome.storage.session.remove('userInfo')
   console.log('User info cleared')
 }
@@ -51,7 +51,7 @@ async function clearUserInfo() {
  * @param {string} accessToken
  * @returns {Promise<UserInfo>}
  */
-async function getMe(accessToken) {
+export async function getMe(accessToken) {
   const response = await fetch(`${API_URL}/auth/me`, {
     headers: {
       Authorization: `Bearer ${accessToken}`
@@ -70,7 +70,7 @@ async function getMe(accessToken) {
 /**
  * @returns {Promise<boolean>}
  */
-async function authenticate() {
+export async function authenticate() {
   /**@type {UserInfo | null} */
   const userInfo = await getUserInfo()
   if (userInfo) {
@@ -94,7 +94,7 @@ async function authenticate() {
 /**
  * @returns {Promise<boolean>}
  */
-async function isLoggedIn() {
+export async function isLoggedIn() {
   const loggedIn = (await chrome.storage.session.get('loggedIn')).loggedIn
   console.log('Logged in:', loggedIn)
   return loggedIn
@@ -103,13 +103,13 @@ async function isLoggedIn() {
 /**
  * @param {boolean} loggedIn
  */
-async function setLoggedIn(loggedIn) {
+export async function setLoggedIn(loggedIn) {
   await chrome.storage.session.set({ loggedIn })
   console.log('Logged in:', loggedIn)
 }
 
 
-function onLoginStatusChange(callback) {
+export function onLoginStatusChange(callback) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'session') return;
     if (changes.loggedIn) {
@@ -122,21 +122,10 @@ function onLoginStatusChange(callback) {
  * @param {chrome.cookies.CookieChangeInfo} changeInfo
  * @returns
  */
-async function handleCookieChange(changeInfo) {
+export async function handleCookieChange(changeInfo) {
   if (changeInfo.cookie.domain !== 'alexis.futurdevs.tech') return;
   if (changeInfo.cookie.name !== 'access_token') return;
   clearUserInfo()
   setLoggedIn(!changeInfo.removed)
   authenticate()
-}
-
-
-export default {
-  authenticate,
-  isLoggedIn,
-  getAccessToken,
-  getUserInfo,
-  setLoggedIn,
-  handleCookieChange,
-  onLoginStatusChange,
 }

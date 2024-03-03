@@ -1,5 +1,5 @@
 'use strict';
-import storage from "./storage";
+import utils from "./utils";
 const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
 const INTRANET_ORIGIN = 'https://intranet.alxswe.com';
 
@@ -52,6 +52,6 @@ chrome.runtime.onMessage.addListener((message, sender) => {
 });
 
 (async () => {
-  storage.authenticate();
-  chrome.cookies.onChanged.addListener(storage.handleCookieChange);
+  utils.authenticate();
+  chrome.cookies.onChanged.addListener(utils.handleCookieChange);
 })();

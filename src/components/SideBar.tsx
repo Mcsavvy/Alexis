@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FaPlus } from 'react-icons/fa';
-import storage, { UserInfo } from '../storage';
+import utils, { UserInfo } from '../utils';
 
 const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
 ('https://intranet.alxswe.com/projects/1232');
@@ -65,7 +65,7 @@ export default function SideBar({
   const [userInfo, setUserInfo] = React.useState<UserInfo | null>(null);
 
   React.useEffect(() => {
-    storage.getUserInfo().then((info) => {
+    utils.getUserInfo().then((info) => {
       setUserInfo(info);
     });
   }, []);

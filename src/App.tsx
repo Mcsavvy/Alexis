@@ -7,9 +7,9 @@ import NotLoggedIn from './components/NotLoggedIn';
 import NotProject from './components/NotProject';
 import ChatPage from './components/ChatPage';
 // @ts-ignore
-import storage from "./storage";
+import utils from "./utils";
 
-const INTRANET_ORIGIN = 'https://intranet.alxswe.com';
+const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;
 
 function App() {
   const [supported, setSupported] = React.useState(true);
@@ -17,7 +17,7 @@ function App() {
   const [tabId, setTabId] = React.useState(0);
   const [isProject, setIsProject] = React.useState(false);
 
-  storage.onLoginStatusChange((loggedIn: boolean) => setLoggedIn(loggedIn));
+  utils.onLoginStatusChange((loggedIn: boolean) => setLoggedIn(loggedIn));
 
   chrome.tabs.onUpdated.addListener((changedTabId, changeInfo) => {
     if (changedTabId !== tabId) return;

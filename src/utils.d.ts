@@ -6,7 +6,7 @@ export type UserInfo = {
   picture: string | null;
 };
 export type LoginStatusChangeCallback = (loggedIn: boolean) => void;
-interface Storage {
+interface Utils {
   onLoginStatusChange: (callback: LoginStatusChangeCallback) => void;
   getUserInfo: () => Promise<UserInfo | null>;
   getAccessToken: () => Promise<string | null>;
@@ -18,5 +18,5 @@ interface Storage {
   setLoggedIn: (loggedIn: boolean) => void;
   handleCookieChange: (changeInfo: chrome.cookies.CookieChangeInfo) => void;
 }
-declare const storage: Storage;
-export default storage
+declare const utils: Utils;
+export default utils

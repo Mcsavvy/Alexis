@@ -5,7 +5,6 @@ import { LuArrowUpSquare } from 'react-icons/lu';
 // import { FiThumbsUp, FiThumbsDown, FiSidebar } from 'react-icons/fi';
 // import { MdContentCopy } from 'react-icons/md';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
-//@ts-ignore
 import storage, { UserInfo } from '../storage';
 import Markdown from 'react-markdown';
 

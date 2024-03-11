@@ -149,6 +149,7 @@ export default function ChatPage() {
   const [query, setQuery] = React.useState('');
   const [typing, setTyping] = React.useState(false);
   const [isNewThread, setIsNewThread] = React.useState(false);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   async function handleSend() {
     const msg = query.trim();
@@ -230,6 +231,13 @@ export default function ChatPage() {
     }
   }, [activeChatID]);
 
+  // Scroll to the bottom of the chat
+  React.useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   return (
     <div className="flex h-[100vh] w-full flex-col">
       {/* SideBar */}
@@ -269,6 +277,7 @@ export default function ChatPage() {
             <AIMessage key={index} message={msg.content} />
           )
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Prompt message input */}

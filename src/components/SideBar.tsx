@@ -39,10 +39,7 @@ function ProfilePicture({ picture }: { picture?: string }) {
   return (
     <img
       className="h-5 w-5 rounded-full"
-      src={
-        picture ||
-        'https://gravatar.com/avatar/b58996c504c5638798eb6b511e6f49af?s=400&d=robohash&r=x'
-      }
+      src={ picture || USER_DEFAULT_IMAGE }
       alt="profile picture"
     />
   );

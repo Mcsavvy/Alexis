@@ -8,7 +8,7 @@ import scrapeProject ,{
 } from './scraper';
 
 
-const PROJECT_URL = /https:\/\/intranet.alxswe.com\/projects\/\d+/;
+const PROJECT_PAT = /\/projects\/\d+/;
 const API_URL = process.env.API_URL;
 
 /**
@@ -96,7 +96,7 @@ $(() => {
       console.log('Received response from %s:', response.from, response.response);
     });
   });
-  if (PROJECT_URL.test(window.location.href)) {
+  if (PROJECT_PAT.test(location.pathname)) {
     console.log('This is a project page');
     saveProject().then((project) => {
       console.log('Project:', project);

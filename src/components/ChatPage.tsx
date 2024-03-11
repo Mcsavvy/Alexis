@@ -7,6 +7,7 @@ import { LuArrowUpSquare } from 'react-icons/lu';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
 import { UserInfo, getAccessToken, getUserInfo } from '../utils';
 import Markdown, {Components} from 'react-markdown';
+import TextareaAutosize from 'react-textarea-autosize';
 
 const API_URL = process.env.API_URL as string;
 const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
@@ -294,22 +295,16 @@ export default function ChatPage() {
       </div>
 
       {/* Prompt message input */}
-      <form className="fixed bottom-0 left-0 right-0  flex w-full items-center rounded-b-md border-t border-slate-300 bg-slate-200 p-2">
+      <form className="fixed bottom-0 left-0 right-0  flex w-full items-end rounded-b-md border-t border-slate-300 bg-slate-200 p-2">
         <label htmlFor="chat" className="sr-only">
           Enter your prompt
         </label>
-        <textarea
-          id="chat-input"
-          rows={1}
+        <TextareaAutosize
+          id="chat"
           value={query}
+          readOnly={typing}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          className="mx-2 flex min-h-full w-full rounded-md border border-slate-300 bg-slate-50 p-2 text-base text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
+          className="flex-1 min-h-full w-full rounded-md border border-slate-300 bg-slate-50 p-2 text-base text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
           placeholder={
             activeThread
               ? activeThread.id == 'new-chat'
@@ -317,17 +312,25 @@ export default function ChatPage() {
                 : `Talking about ${activeThread.title}`
               : 'Ready to chat?'
           }
-        ></textarea>
+          // send message on ctrl+enter
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+        />
         <div>
           <button
+            disabled={!query || typing}
             onClick={(e) => {
               e.preventDefault();
               handleSend();
             }}
-            className="inline-flex hover:text-light-primary sm:p-2"
+            className="inline-flex sm:p-2"
           >
             {typing ? (
-              <CgSpinner className="animate-spin h-8 w-8 hover:text-light-primary" />
+              <CgSpinner className="animate-spin h-8 w-8 text-light-primary" />
             ) : (
               <LuArrowUpSquare className="w-8 h-8" />
             )}

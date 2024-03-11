@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
+const API_URL = process.env.API_URL;
 
 /**
  * @typedef {{

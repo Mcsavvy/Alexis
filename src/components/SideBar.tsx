@@ -2,8 +2,8 @@ import * as React from 'react';
 import { FaPlus } from 'react-icons/fa';
 import { UserInfo, getUserInfo } from '../utils';
 
-const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
-('https://intranet.alxswe.com/projects/1232');
+const API_URL = process.env.API_URL as string;
+const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
 
 export type Thread = {
   id: string;

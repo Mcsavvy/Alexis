@@ -1,7 +1,7 @@
 'use strict';
 import {handleCookieChange, authenticate} from "./utils";
-const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
-const INTRANET_ORIGIN = 'https://intranet.alxswe.com';
+const API_URL = process.env.API_URL;
+const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN;
 
 
 chrome.storage.session.setAccessLevel({

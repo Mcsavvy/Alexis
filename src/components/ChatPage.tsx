@@ -8,9 +8,10 @@ import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
 import { UserInfo, getAccessToken, getUserInfo } from '../utils';
 import Markdown from 'react-markdown';
 
-const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
-const USER_DEFAULT_IMAGE =
-  'https://gravatar.com/avatar/b58996c504c5638798eb6b511e6f49af?s=400&d=robohash&r=x';
+const API_URL = process.env.API_URL as string;
+const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
+const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;
+
 
 export function HumanMessage({
   message,

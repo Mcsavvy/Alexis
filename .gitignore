@@ -14,3 +14,6 @@ npm-debug.log*
 # packed files
 /release
 build.zip
+
+# local env files
+.env

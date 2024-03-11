@@ -1,5 +1,6 @@
 'use strict';
-
+const {config: dotenvConfig} = require('dotenv');
+const {DefinePlugin} = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const PATHS = require('./paths');
@@ -80,6 +81,10 @@ const common = {
     // Extract CSS into separate files
     new MiniCssExtractPlugin({
       filename: '[name].css',
+    }),
+    // .env variables
+    new DefinePlugin({
+      'process.env': JSON.stringify(dotenvConfig().parsed),
     }),
   ],
 };

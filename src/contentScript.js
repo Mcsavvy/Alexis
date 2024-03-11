@@ -9,7 +9,7 @@ import scrapeProject ,{
 
 
 const PROJECT_URL = /https:\/\/intranet.alxswe.com\/projects\/\d+/;
-const API_URL = 'https://alexis-api-ed4af4cf5335.herokuapp.com';
+const API_URL = process.env.API_URL;
 
 /**
  * @typedef {{

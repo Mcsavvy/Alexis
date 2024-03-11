@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 export default function NotLoggedIn() {
-  const loginUrl = 'https://alexis.futurdevs.tech';
+  const loginUrl = process.env.LOGIN_URL as string;
 
   const handleLogin = () => {
     window.open(loginUrl, '_blank');

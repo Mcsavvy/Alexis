@@ -8,6 +8,8 @@ import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
 import { UserInfo, getAccessToken, getUserInfo } from '../utils';
 import Markdown, {Components} from 'react-markdown';
 import TextareaAutosize from 'react-textarea-autosize';
+import { saveCurrentThread } from '../utils';
+import { getCurrentThread } from '../utils';
 
 const API_URL = process.env.API_URL as string;
 const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
@@ -211,15 +213,22 @@ export default function ChatPage() {
   React.useEffect(() => {
     if (!project) return;
     fetchThreads(project).then((threads) => {
+      const history = threads.map((thread) => ({
+        ...thread,
+        display: true,
+        active: false,
+      }));
       setChatHistory([
         { id: 'new-chat', title: 'New Chat', display: false, project: project },
-        ...threads.map((thread) => ({
-          ...thread,
-          display: true,
-          active: false,
-        })),
+        ...history,
       ]);
-      setActiveChatID('new-chat');
+      getCurrentThread().then((threadId) => {
+        if (threadId && history.find((thread) => thread.id === threadId)) {
+          setActiveChatID(threadId);
+        } else {
+          setActiveChatID('new-chat');
+        }
+      });
     });
   }, [project]);
 
@@ -239,6 +248,7 @@ export default function ChatPage() {
         setIsNewThread(false);
         return;
       }
+      saveCurrentThread(active.id);
       fetchMessages(active.id).then((messages) => {
         setMessages(messages);
       });

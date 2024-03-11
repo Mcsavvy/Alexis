@@ -129,3 +129,20 @@ export async function handleCookieChange(changeInfo) {
   setLoggedIn(!changeInfo.removed)
   authenticate()
 }
+
+
+/**
+ * @param {string} threadId
+ * @returns {Promise<void>}
+ */
+export async function saveCurrentThread(threadId) {
+  await chrome.storage.local.set({ currentThread: threadId })
+}
+
+/**
+ * @returns {Promise<string | null>}
+ */
+export async function getCurrentThread() {
+  const threadId = (await chrome.storage.local.get('currentThread')).currentThread
+  return threadId
+}

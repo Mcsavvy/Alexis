@@ -6,7 +6,6 @@ import NotSupported from './components/NotSupported';
 import NotLoggedIn from './components/NotLoggedIn';
 import NotProject from './components/NotProject';
 import ChatPage from './components/ChatPage';
-// @ts-ignore
 import {onLoginStatusChange} from "./utils";
 
 const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;

@@ -6,12 +6,23 @@ import { LuArrowUpSquare } from 'react-icons/lu';
 // import { MdContentCopy } from 'react-icons/md';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
 import { UserInfo, getAccessToken, getUserInfo } from '../utils';
-import Markdown from 'react-markdown';
+import Markdown, {Components} from 'react-markdown';
 
 const API_URL = process.env.API_URL as string;
 const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
 const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;
 
+const Components: Components = {
+  a: ({ node, href, ...props }) => {
+    const url = new URL(href);
+    // https://rltoken/C5_IRM981SVn8oA8RP3gag
+    if (url.origin === 'https://rltoken') {
+      href = INTRANET_ORIGIN + "/rltoken" + url.pathname;
+    }
+    return <a href={href} {...props} target='_blank' />;
+  }
+
+}
 
 export function HumanMessage({
   message,
@@ -28,7 +39,7 @@ export function HumanMessage({
       />
 
       <div className="flex max-w-3xl items-center">
-        <Markdown>{message}</Markdown>
+        <Markdown className="chat-message human-chat" components={Components}>{message}</Markdown>
       </div>
     </div>
   );
@@ -43,7 +54,9 @@ export function AIMessage({ message }: { message: string }) {
       />
 
       <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
-        <Markdown className='max-w-3xl'>{message}</Markdown>
+        <Markdown className="max-w-3xl chat-message ai-chat" components={Components}>
+          {message}
+        </Markdown>
         {/* <div className="mt-4 flex flex-row justify-start gap-x-2 text-slate-500 lg:mt-0">
           <button className="hover:text-light-primary">
             <FiThumbsUp />

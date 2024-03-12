@@ -117,46 +117,6 @@ type ChatMessage = {
   type: 'human' | 'ai';
 };
 
-async function createThread(project: string): Promise<Thread> {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${API_URL}/chat/threads`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ project }),
-  });
-  const data: Thread = await response.json();
-  console.log('created thread:', data);
-  return data;
-}
-
-async function sendMessage(thread: string, message: string): Promise<string> {
-  const accessToken = await getAccessToken();
-  const config = {
-    configurable: {
-      //@ts-ignore
-      thread_id: thread,
-      max_token_limit: 3000,
-    },
-  };
-  const response = await fetch(`${API_URL}/alexis/invoke`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      input: { query: message },
-      config,
-    }),
-  });
-  const data = await response.json();
-  console.log('got response:', data);
-  return data.output;
-}
-
 export default function ChatPage() {
   const [project, setProject] = React.useState('');
   const [chatHistory, setChatHistory] = React.useState<ChatHistoryDisplay[]>(

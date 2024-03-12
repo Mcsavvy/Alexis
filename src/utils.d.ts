@@ -16,5 +16,5 @@ export const authenticate: () => boolean;
 export const isLoggedIn: () => boolean;
 export const setLoggedIn: (loggedIn: boolean) => void;
 export const handleCookieChange: (changeInfo: chrome.cookies.CookieChangeInfo) => void;
-export const saveCurrentThread: (threadId: string) => Promise<void>;
-export const getCurrentThread: () => Promise<string | null>;
+export const saveCurrentThread: (threadId: string, project: string) => Promise<void>;
+export const getCurrentThread: (project: string) => Promise<string | null>;

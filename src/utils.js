@@ -133,16 +133,18 @@ export async function handleCookieChange(changeInfo) {
 
 /**
  * @param {string} threadId
+ * @param {string} project
  * @returns {Promise<void>}
  */
-export async function saveCurrentThread(threadId) {
-  await chrome.storage.local.set({ currentThread: threadId })
+export async function saveCurrentThread(threadId, project) {
+  await chrome.storage.local.set({ [`${project}.currentThread`]: threadId })
 }
 
 /**
+ * @param {string} project
  * @returns {Promise<string | null>}
  */
-export async function getCurrentThread() {
-  const threadId = (await chrome.storage.local.get('currentThread')).currentThread
+export async function getCurrentThread(project) {
+  const threadId = (await chrome.storage.local.get(`${project}.currentThread`))[`${project}.currentThread`]
   return threadId
 }

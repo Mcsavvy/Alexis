@@ -6,10 +6,11 @@ import { LuArrowUpSquare } from 'react-icons/lu';
 // import { MdContentCopy } from 'react-icons/md';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
 import { UserInfo, getAccessToken, getUserInfo } from '../utils';
-import Markdown, {Components} from 'react-markdown';
+import Markdown, { Components } from 'react-markdown';
 import TextareaAutosize from 'react-textarea-autosize';
 import { saveCurrentThread } from '../utils';
 import { getCurrentThread } from '../utils';
+import socket, { SocketIO, ChatInfo, addHandler } from './Socket';
 
 const API_URL = process.env.API_URL as string;
 const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
@@ -18,14 +19,12 @@ const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;
 const Components: Components = {
   a: ({ node, href, ...props }) => {
     const url = new URL(href);
-    // https://rltoken/C5_IRM981SVn8oA8RP3gag
     if (url.origin === 'https://rltoken') {
-      href = INTRANET_ORIGIN + "/rltoken" + url.pathname;
+      href = INTRANET_ORIGIN + '/rltoken' + url.pathname;
     }
-    return <a href={href} {...props} target='_blank' />;
-  }
-
-}
+    return <a href={href} {...props} target="_blank" />;
+  },
+};
 
 export function HumanMessage({
   message,
@@ -122,80 +121,128 @@ export default function ChatPage() {
   const [chatHistory, setChatHistory] = React.useState<ChatHistoryDisplay[]>(
     []
   );
+  const queryId = React.useRef('fakeQueryID');
+  const responseId = React.useRef('fakeResponseID');
+  const userInfo = React.useRef<UserInfo | null>(null);
+  const [response, _setResponse] = React.useState('');
+  const responseRef = React.useRef(response);
+  const [activeChatID, _setActiveChatID] = React.useState<string>();
+  const activeChatIdRef = React.useRef<string | null>(activeChatID);
   const [showSidebar, setShowSidebar] = React.useState(false);
-  const [activeChatID, setActiveChatID] = React.useState<string>();
   const [activeThread, setActiveThread] = React.useState<Thread | null>(null);
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
-  const userInfo = React.useRef<UserInfo | null>(null);
   const [query, setQuery] = React.useState('');
   const [typing, setTyping] = React.useState(false);
-  const [isNewThread, setIsNewThread] = React.useState(false);
+  const isNewThread = React.useRef(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
-  async function handleSend() {
-    const msg = query.trim();
-    let threadId = activeChatID;
-    if (!msg) return;
-    setQuery('');
-    setMessages([...messages, { id: 'new-msg', content: msg, type: 'human' }]);
-    if (activeChatID === 'new-chat') {
-      const newThread = await createThread(project);
-      setActiveChatID(newThread.id);
-      threadId = newThread.id;
-      setIsNewThread(true);
-      setChatHistory((history) => [
-        { ...newThread, display: true, active: true },
-        ...history,
-      ]);
-      setMessages([{ id: 'new-msg', content: msg, type: 'human' }]);
-    }
-    setTyping(true);
-    const response = await sendMessage(threadId, msg);
-    setMessages((messages) => [
-      ...messages,
-      { id: 'new-msg', content: response, type: 'ai' },
-    ]);
-    setTyping(false);
+  function setActiveChatID(id: string | ((id: string) => string)) {
+    _setActiveChatID((prev) => {
+      console.log('Setting active chat to:', id);
+      let newId;
+      if (typeof id === 'function') newId = id(prev);
+      else newId = id;
+      activeChatIdRef.current = newId;
+      return newId;
+    });
   }
 
-  // Fetch project ID from the current tab
-  React.useEffect(() => {
-    (async () => {
-      const tab = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      const url = new URL(tab[0].url);
-      const projectId = url.pathname.match(/^\/projects\/(\d+)/)[1];
-      setProject(projectId);
-      getUserInfo().then((info: UserInfo) => {
-        userInfo.current = info;
-      });
-    })();
-  }, []);
+  function setResponse(res: string | ((res: string) => string)) {
+    _setResponse((prev) => {
+      let newResponse;
+      if (typeof res === 'function') newResponse = res(prev);
+      else newResponse = res;
+      responseRef.current = newResponse;
+      return newResponse;
+    });
+  }
 
-  // Fetch chat history
-  React.useEffect(() => {
-    if (!project) return;
-    fetchThreads(project).then((threads) => {
-      const history = threads.map((thread) => ({
+  function handleSend() {
+    const msg = query.trim();
+    if (!msg) return;
+    setMessages((messages) => [
+      ...messages,
+      { id: queryId.current, content: query, type: 'human' },
+    ]);
+    setQuery('');
+    const payload: { query: string; thread_id?: string } = { query: msg };
+    if (activeChatID !== 'new-chat') payload['thread_id'] = activeChatID;
+    else isNewThread.current = true;
+    console.log('sending query with payload:', payload);
+    setTyping(true);
+    socket.emit('query', payload, () => {
+      setTyping(false);
+      console.log('got response:', responseRef.current);
+      const aiResponse = responseRef.current;
+      setMessages((messages) => [
+        ...messages,
+        { id: responseId.current, content: aiResponse, type: 'ai' },
+      ]);
+      setResponse('');
+    });
+  }
+
+  async function initialSetup() {
+    const tab = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    const url = new URL(tab[0].url);
+    const projectId = url.pathname.match(/^\/projects\/(\d+)/)[1];
+    setProject(projectId);
+    userInfo.current = await getUserInfo();
+    const threads = await fetchThreads(projectId);
+    setChatHistory([
+      { id: 'new-chat', title: 'New Chat', display: false, project: projectId },
+      ...threads.map((thread) => ({
         ...thread,
         display: true,
         active: false,
-      }));
-      setChatHistory([
-        { id: 'new-chat', title: 'New Chat', display: false, project: project },
-        ...history,
-      ]);
-      getCurrentThread().then((threadId) => {
-        if (threadId && history.find((thread) => thread.id === threadId)) {
-          setActiveChatID(threadId);
-        } else {
-          setActiveChatID('new-chat');
-        }
-      });
-    });
-  }, [project]);
+      })),
+    ]);
+    const threadId = await getCurrentThread(projectId);
+    if (threadId && threads.find((thread) => thread.id === threadId)) {
+      setActiveChatID(threadId);
+    } else {
+      setActiveChatID('new-chat');
+    }
+  }
+
+  // Setup
+  React.useEffect(() => {
+    initialSetup();
+
+    function onChatInfo(info: ChatInfo) {
+      console.log('Got chat info:', info);
+      console.log('Active chat:', activeChatIdRef.current);
+      if (info.thread_id !== activeChatIdRef.current) {
+        const thread: Thread = {
+          id: info.thread_id,
+          title: info.thread_title,
+          project: project,
+        };
+        setActiveChatID(thread.id);
+        setChatHistory((history) => [
+          { ...thread, display: true, active: true },
+          ...history,
+        ]);
+      } else {
+        console.log('Already active chat');
+      }
+    }
+
+    function onReponse({ chunk }: { chunk: string }) {
+      setResponse((response) => response + chunk);
+    }
+
+    const handlers = [
+      addHandler('chat_info', onChatInfo),
+      addHandler('response', onReponse),
+    ];
+    return () => {
+      handlers.forEach((h) => h());
+    };
+  }, []);
 
   // Fetch messages for the active chat
   React.useEffect(() => {
@@ -209,27 +256,23 @@ export default function ChatPage() {
     if (activeChatID === 'new-chat') {
       setMessages([]);
     } else {
-      if (isNewThread) {
-        setIsNewThread(false);
-        return;
-      }
-      saveCurrentThread(active.id);
-      fetchMessages(active.id).then((messages) => {
-        setMessages(messages);
-      });
+      saveCurrentThread(active.id, active.project);
+      !isNewThread.current &&
+        fetchMessages(active.id).then((messages) => {
+          setMessages(messages);
+        });
     }
   }, [activeChatID]);
 
   // Scroll to the bottom of the chat
   React.useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, response]);
 
   return (
     <div className="flex h-[100vh] w-full flex-col">
       {/* SideBar */}
+      <SocketIO />
       <SideBar
         visible={showSidebar}
         history={chatHistory}
@@ -259,13 +302,16 @@ export default function ChatPage() {
           msg.type === 'human' ? (
             <HumanMessage
               key={index}
-              message={msg.content}
-              picture={userInfo.current && userInfo.current.picture}
+              message={msg}
+              picture={userInfo.current?.picture}
             />
           ) : (
-            <AIMessage key={index} message={msg.content} />
+            <AIMessage key={index} message={msg} />
           )
         )}
+        <AIMessage
+          message={{ id: responseId.current, content: response, type: 'ai' }}
+        />
         <div ref={messagesEndRef} />
       </div>
 

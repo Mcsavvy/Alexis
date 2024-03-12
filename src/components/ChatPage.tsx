@@ -31,10 +31,10 @@ export function HumanMessage({
   message,
   picture,
 }: {
-  message: string;
+  message: ChatMessage;
   picture?: string;
 }) {
-  return (
+  return message.content ? (
     <div className="flex flex-row px-4 py-8 sm:px-6">
       <img
         className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
@@ -42,14 +42,16 @@ export function HumanMessage({
       />
 
       <div className="flex max-w-3xl items-center">
-        <Markdown className="chat-message human-chat" components={Components}>{message}</Markdown>
+        <Markdown className="chat-message human-chat" components={Components}>
+          {message.content}
+        </Markdown>
       </div>
     </div>
-  );
+  ) : null;
 }
 
-export function AIMessage({ message }: { message: string }) {
-  return (
+export function AIMessage({ message }: { message: ChatMessage }) {
+  return message.content ? (
     <div className="flex bg-white px-4 py-8 sm:px-6">
       <img
         className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
@@ -57,8 +59,11 @@ export function AIMessage({ message }: { message: string }) {
       />
 
       <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
-        <Markdown className="max-w-3xl chat-message ai-chat" components={Components}>
-          {message}
+        <Markdown
+          className="max-w-3xl chat-message ai-chat"
+          components={Components}
+        >
+          {message.content}
         </Markdown>
         {/* <div className="mt-4 flex flex-row justify-start gap-x-2 text-slate-500 lg:mt-0">
           <button className="hover:text-light-primary">
@@ -73,7 +78,7 @@ export function AIMessage({ message }: { message: string }) {
         </div> */}
       </div>
     </div>
-  );
+  ) : null;
 }
 
 async function fetchThreads(project: string): Promise<Thread[]> {

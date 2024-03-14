@@ -4,6 +4,7 @@ const {DefinePlugin} = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const PATHS = require('./paths');
+const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 
 // used in the module rules and in the stats exlude list
 const IMAGE_TYPES = /\.(png|jpe?g|gif|svg)$/i;
@@ -12,7 +13,7 @@ const IMAGE_TYPES = /\.(png|jpe?g|gif|svg)$/i;
 // CLI maintains a common webpack configuration file - `webpack.common.js`.
 // Whenever user creates an extension, CLI adds `webpack.common.js` file
 // in template's `config` folder
-const common = {
+const common = (env, argv) => ({
   output: {
     // the build folder to output bundles and assets in.
     path: PATHS.build,
@@ -86,7 +87,14 @@ const common = {
     new DefinePlugin({
       'process.env': JSON.stringify(dotenvConfig().parsed),
     }),
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: 'futurdevs',
+      project: 'alexis-ui',
+      telemetry: false,
+      disable: argv.mode === 'development',
+    }),
   ],
-};
+});
 
 module.exports = common;

@@ -1,6 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-
 const API_URL = process.env.API_URL;
 
 /**
@@ -28,6 +27,7 @@ export async function getAccessToken() {
 export async function getUserInfo() {
   const userInfo = (await chrome.storage.session.get('userInfo')).userInfo
   console.log('User info:', userInfo)
+
   return userInfo
 }
 

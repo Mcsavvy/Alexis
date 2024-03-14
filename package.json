@@ -65,6 +65,9 @@
     "webpack-merge": "^5.10.0"
   },
   "dependencies": {
+    "@sentry/browser": "^7.106.1",
+    "@sentry/react": "^7.106.1",
+    "@sentry/webpack-plugin": "^2.14.3",
     "jquery": "^3.7.1",
     "react-icons": "^5.0.1"
   }

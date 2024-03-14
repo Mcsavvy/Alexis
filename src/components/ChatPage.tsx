@@ -15,6 +15,7 @@ import socket, { SocketIO, ChatInfo, addHandler } from './Socket';
 const API_URL = process.env.API_URL as string;
 const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
 const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;
+import * as Sentry from '@sentry/react';
 
 const Components: Components = {
   a: ({ node, href, ...props }) => {
@@ -26,15 +27,20 @@ const Components: Components = {
   },
 };
 
-export function HumanMessage({
-  message,
-  picture,
-}: {
+interface BaseMessageProps {
   message: ChatMessage;
+  msgRef?: React.LegacyRef<HTMLDivElement>;
+}
+
+interface HumanMessageProps extends BaseMessageProps {
   picture?: string;
-}) {
+}
+
+interface AIMessageProps extends BaseMessageProps {}
+
+export function HumanMessage({ message, picture, msgRef }: HumanMessageProps) {
   return message.content ? (
-    <div className="flex flex-row px-4 py-8 sm:px-6">
+    <div className="flex flex-row px-4 py-8 sm:px-6" ref={msgRef}>
       <img
         className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
         src={picture || USER_DEFAULT_IMAGE}
@@ -49,9 +55,9 @@ export function HumanMessage({
   ) : null;
 }
 
-export function AIMessage({ message }: { message: ChatMessage }) {
+export function AIMessage({ message, msgRef}: AIMessageProps) {
   return message.content ? (
-    <div className="flex bg-white px-4 py-8 sm:px-6">
+    <div className="flex bg-white px-4 py-8 sm:px-6" ref={msgRef}>
       <img
         className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
         src="/icons/icon48.png"
@@ -81,33 +87,40 @@ export function AIMessage({ message }: { message: ChatMessage }) {
 }
 
 async function fetchThreads(project: string): Promise<Thread[]> {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${API_URL}/chat/threads/${project}`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  return await Sentry.withScope(async (scope) => {
+    const accessToken = await getAccessToken();
+    scope.setTransactionName('fetchThreads');
+    const response = await fetch(`${API_URL}/chat/threads/${project}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data: Thread[] = await response.json();
+    console.log('fetched threads:', data);
+    return data;
   });
-  const data: Thread[] = await response.json();
-  console.log('fetched threads:', data);
-  return data;
 }
 
 async function fetchMessages(thread: string): Promise<ChatMessage[]> {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${API_URL}/chat/threads/${thread}/messages`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  return await Sentry.withScope(async (scope) => {
+    scope.setTransactionName('fetchThreadMessages');
+    scope.setTag('thread', thread);
+    const accessToken = await getAccessToken();
+    const response = await fetch(`${API_URL}/chat/threads/${thread}/messages`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data: any[] = await response.json();
+    console.log('fetched messages:', data);
+    return data.map((message) => ({
+      id: message.id,
+      content: message.content,
+      type: message.chat_type.toLowerCase() == 'query' ? 'human' : 'ai',
+    }));
   });
-  const data: any[] = await response.json();
-  console.log('fetched messages:', data);
-  return data.map((message) => ({
-    id: message.id,
-    content: message.content,
-    type: message.chat_type.toLowerCase() == 'query' ? 'human' : 'ai',
-  }));
 }
 
 type ChatMessage = {
@@ -121,20 +134,25 @@ export default function ChatPage() {
   const [chatHistory, setChatHistory] = React.useState<ChatHistoryDisplay[]>(
     []
   );
-  const queryId = React.useRef('fakeQueryID');
-  const responseId = React.useRef('fakeResponseID');
+  const queryIdRef = React.useRef('fakeQueryID');
+  const responseIdRef = React.useRef('fakeResponseID');
   const userInfo = React.useRef<UserInfo | null>(null);
   const [response, _setResponse] = React.useState('');
+  const [query, _setQuery] = React.useState('');
   const responseRef = React.useRef(response);
+  const queryRef = React.useRef(query);
   const [activeChatID, _setActiveChatID] = React.useState<string>();
   const activeChatIdRef = React.useRef<string | null>(activeChatID);
   const [showSidebar, setShowSidebar] = React.useState(false);
   const [activeThread, setActiveThread] = React.useState<Thread | null>(null);
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
-  const [query, setQuery] = React.useState('');
+  const [input, setInput] = React.useState('');
   const [typing, setTyping] = React.useState(false);
   const isNewThread = React.useRef(false);
-  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const lastChatMessageRef = React.useRef<HTMLDivElement>(null);
+  const tempHumanMessageRef = React.useRef<HTMLDivElement>(null);
+  const tempAIMessageRef = React.useRef<HTMLDivElement>(null);
+  const responseTokenCountRef = React.useRef(0);
 
   function setActiveChatID(id: string | ((id: string) => string)) {
     _setActiveChatID((prev) => {
@@ -143,6 +161,7 @@ export default function ChatPage() {
       if (typeof id === 'function') newId = id(prev);
       else newId = id;
       activeChatIdRef.current = newId;
+      Sentry.setTag('activeThread', newId);
       return newId;
     });
   }
@@ -157,29 +176,78 @@ export default function ChatPage() {
     });
   }
 
-  function handleSend() {
-    const msg = query.trim();
-    if (!msg) return;
+  function setQuery(q: string | ((r: string) => string)) {
+    _setQuery((prev) => {
+      let newQuery;
+      if (typeof q === 'function') newQuery = q(prev);
+      else newQuery = q;
+      queryRef.current = newQuery;
+      return newQuery;
+    });
+  }
+
+  function handleChatInfo(info: ChatInfo) {
+    tempHumanMessageRef.current?.scrollIntoView({behavior: "smooth"});
+    Sentry.withScope((scope) => {
+      scope.setTransactionName('handleChatInfo');
+      console.log('Got chat info:', info);
+      console.log('Active chat:', activeChatIdRef.current);
+      if (info.thread_id !== activeChatIdRef.current) {
+        const thread: Thread = {
+          id: info.thread_id,
+          title: info.thread_title,
+          project: project,
+        };
+        setActiveChatID(thread.id);
+        setChatHistory((history) => [
+          { ...thread, display: true, active: true },
+          ...history,
+        ]);
+        queryIdRef.current = info.query_id;
+        responseIdRef.current = info.response_id;
+      } else {
+        console.log('Already active chat');
+      }
+    });
+  }
+
+  function handleReponse({ chunk }: { chunk: string }) {
+    Sentry.withScope((scope) => {
+      scope.setTransactionName('handleResponse');
+      setResponse((response) => response + chunk);
+      responseTokenCountRef.current++;
+    });
+    if (responseTokenCountRef.current % 20 == 0) {
+      // scroll into view after every 20 tokens
+      tempAIMessageRef.current?.scrollIntoView({behavior: "smooth"})
+    }
+  }
+
+  function afterSend() {
+    setTyping(false);
+    console.log('got response:', responseRef.current);
+    const aiResponse = responseRef.current;
+    const humanQuery = queryRef.current;
     setMessages((messages) => [
       ...messages,
-      { id: queryId.current, content: query, type: 'human' },
+      { id: queryIdRef.current, content: humanQuery, type: 'human' },
+      { id: responseIdRef.current, content: aiResponse, type: 'ai' },
     ]);
+    setResponse('');
     setQuery('');
+  }
+
+  function handleSend() {
+    const msg = input.trim();
+    if (!msg) return;
+    setQuery(msg);
+    setInput('');
     const payload: { query: string; thread_id?: string } = { query: msg };
     if (activeChatID !== 'new-chat') payload['thread_id'] = activeChatID;
     else isNewThread.current = true;
     console.log('sending query with payload:', payload);
     setTyping(true);
-    socket.emit('query', payload, () => {
-      setTyping(false);
-      console.log('got response:', responseRef.current);
-      const aiResponse = responseRef.current;
-      setMessages((messages) => [
-        ...messages,
-        { id: responseId.current, content: aiResponse, type: 'ai' },
-      ]);
-      setResponse('');
-    });
+    socket.emit('query', payload, afterSend);
   }
 
   async function initialSetup() {
@@ -187,10 +255,16 @@ export default function ChatPage() {
       active: true,
       currentWindow: true,
     });
+    Sentry.getCurrentScope().setTransactionName('Chat');
     const url = new URL(tab[0].url);
     const projectId = url.pathname.match(/^\/projects\/(\d+)/)[1];
     setProject(projectId);
+    Sentry.setTag('projectId', projectId);
     userInfo.current = await getUserInfo();
+    Sentry.setUser({
+      username: userInfo.current.firstName + ' ' + userInfo.current.lastName,
+      email: userInfo.current.email,
+    });
     const threads = await fetchThreads(projectId);
     setChatHistory([
       { id: 'new-chat', title: 'New Chat', display: false, project: projectId },
@@ -211,33 +285,9 @@ export default function ChatPage() {
   // Setup
   React.useEffect(() => {
     initialSetup();
-
-    function onChatInfo(info: ChatInfo) {
-      console.log('Got chat info:', info);
-      console.log('Active chat:', activeChatIdRef.current);
-      if (info.thread_id !== activeChatIdRef.current) {
-        const thread: Thread = {
-          id: info.thread_id,
-          title: info.thread_title,
-          project: project,
-        };
-        setActiveChatID(thread.id);
-        setChatHistory((history) => [
-          { ...thread, display: true, active: true },
-          ...history,
-        ]);
-      } else {
-        console.log('Already active chat');
-      }
-    }
-
-    function onReponse({ chunk }: { chunk: string }) {
-      setResponse((response) => response + chunk);
-    }
-
     const handlers = [
-      addHandler('chat_info', onChatInfo),
-      addHandler('response', onReponse),
+      addHandler('chat_info', handleChatInfo),
+      addHandler('response', handleReponse),
     ];
     return () => {
       handlers.forEach((h) => h());
@@ -266,8 +316,8 @@ export default function ChatPage() {
 
   // Scroll to the bottom of the chat
   React.useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, response]);
+    lastChatMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   return (
     <div className="flex h-[100vh] w-full flex-col">
@@ -306,13 +356,22 @@ export default function ChatPage() {
               picture={userInfo.current?.picture}
             />
           ) : (
-            <AIMessage key={index} message={msg} />
+            <AIMessage
+              key={index}
+              message={msg}
+              msgRef={index == messages.length - 1 ? lastChatMessageRef : null}
+            />
           )
         )}
-        <AIMessage
-          message={{ id: responseId.current, content: response, type: 'ai' }}
+        <HumanMessage
+          message={{ id: '', content: query, type: 'human' }}
+          picture={userInfo.current?.picture}
+          msgRef={tempHumanMessageRef}
         />
-        <div ref={messagesEndRef} />
+        <AIMessage
+          message={{ id: '', content: response, type: 'ai' }}
+          msgRef={tempAIMessageRef}
+        />
       </div>
 
       {/* Prompt message input */}
@@ -322,9 +381,9 @@ export default function ChatPage() {
         </label>
         <TextareaAutosize
           id="chat"
-          value={query}
+          value={input}
           readOnly={typing}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           className="flex-1 min-h-full w-full rounded-md border border-slate-300 bg-slate-50 p-2 text-base text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
           placeholder={
             activeThread
@@ -343,7 +402,7 @@ export default function ChatPage() {
         />
         <div>
           <button
-            disabled={!query || typing}
+            disabled={!input || typing}
             onClick={(e) => {
               e.preventDefault();
               handleSend();

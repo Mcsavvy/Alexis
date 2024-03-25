@@ -14,8 +14,6 @@ import { isLoggedIn } from './utils';
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   integrations: [
-      // See docs for support of different versions of variation of react router
-      // https://docs.sentry.io/platforms/javascript/guides/react/configuration/integrations/react-router/
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration()
   ],
@@ -33,7 +31,8 @@ function App() {
 
   onLoginStatusChange((loggedIn: boolean) => setLoggedIn(loggedIn));
 
-  chrome.tabs.onUpdated.addListener((changedTabId, changeInfo) => {
+  // @ts-ignore
+  chrome.tabs.onUpdated.addListener((changedTabId: number, changeInfo: chrome.tabs.TabChangeInfo) => {
     if (changedTabId !== tabId) return;
     Sentry.withScope(scope => {
       scope.setTransactionName('tabUpdated');
@@ -42,6 +41,7 @@ function App() {
   });
 
   function handleTabUpdate(tab: { id?: number, url?: string }) {
+    if (!(tab.url && tab.id)) return;
     const url = new URL(tab.url);
     Sentry.setTag('tabId', tab.id.toString());
     Sentry.setTag('url', tab.url);
@@ -69,6 +69,13 @@ function App() {
         active: true,
         currentWindow: true,
       });
+      if (tabs.length === 0) {
+        Sentry.captureMessage('No active tab', "warning");
+        return;
+      } else if (!tabs[0].id) {
+        Sentry.captureMessage('No tab ID', "warning");
+        return;
+      }
       setTabId(tabs[0].id);
       handleTabUpdate(tabs[0]);
     });
@@ -89,8 +96,8 @@ function App() {
     } else {
       getUserInfo().then((userInfo) => {
         Sentry.setUser({
-          username: userInfo.firstName + ' ' + userInfo.lastName,
-          email: userInfo.email,
+          username: userInfo?.firstName + ' ' + userInfo?.lastName,
+          email: userInfo?.email || undefined,
         });
       });
     }
@@ -107,6 +114,9 @@ function App() {
 }
 
 const container = document.getElementById('root');
+if (!container) {
+  throw new Error('No root element found');
+}
 const root = createRoot(container);
 root.render(
   <React.StrictMode>

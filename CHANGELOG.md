@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2024-03-25
+
+### 🐛 Bug Fixes
+
+- Fixed release script
+
+### 🚜 Refactor
+
+- Refactor release.yaml
+
 ## [0.3.0] - 2024-03-25
 
 ### 🚀 Features

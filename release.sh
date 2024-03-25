@@ -41,7 +41,10 @@ echo "Releasing version $new_version"
 
 # save the current branch
 previous_branch=$(git rev-parse --abbrev-ref HEAD)
-git checkout -b dev
+
+# switch to the dev branch if it exists
+# else create a new branch
+git checkout dev || git checkout -b dev main
 
 # add a new tag
 git tag -a "v$new_version" -m "v$new_version"
@@ -60,7 +63,7 @@ git push -u origin HEAD --tags || exit $?
 
 # Pr to main
 pr_title="Release v$new_version 🚀"
-pr_body=$(git-cliff --current -s all)
+pr_body=$(git-cliff --latest -s all)
 gh pr create -B main -H dev -t "$pr_title" -b "$pr_body"
 
 # go back to the previous branch

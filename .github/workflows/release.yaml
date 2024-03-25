@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '20.10.0'
 
       - name: Build Extension
         run: |
@@ -48,18 +48,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
-          name: Release ${{ github.ref }}
-          files: release/*.zip
+          name: Release ${{ github.ref_name }} 🚀
+          files: release/Alexis-*.zip
           body_path: release_notes.md
           draft: false
           prerelease: false
-      - name: Upload To Chrome Web Store
-        uses: mnao305/chrome-extension-upload@v5.0.0
-        with:
-          file-path: release/Alexis-${{ github.ref }}.zip
-          extension-id: ${{ vars.CHROME_EXTENSION_ID }}
-          client-id: ${{ secrets.GOOGLE_CLIENT_ID }}
-          client-secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          refresh-token: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
 
 

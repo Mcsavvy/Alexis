@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2024-03-25
+
+### 🚀 Features
+
+- Added git-cliff config
+- Add release workflow and release script
+- Add Changelog
+
+### ⚙️  Miscellaneous Tasks
+
+- Handle minor errors
+
 ## [0.2.0] - 2024-03-22
 
 ### 🚀 Features

@@ -41,7 +41,10 @@ echo "Releasing version $new_version"
 
 # save the current branch
 previous_branch=$(git rev-parse --abbrev-ref HEAD)
-git checkout -b dev
+
+# switch to the dev branch if it exists
+# else create a new branch
+git checkout dev || git checkout -b dev main
 
 # add a new tag
 git tag -a "v$new_version" -m "v$new_version"

@@ -63,7 +63,7 @@ git push -u origin HEAD --tags || exit $?
 
 # Pr to main
 pr_title="Release v$new_version 🚀"
-pr_body=$(git-cliff --current -s all)
+pr_body=$(git-cliff --latest -s all)
 gh pr create -B main -H dev -t "$pr_title" -b "$pr_body"
 
 # go back to the previous branch

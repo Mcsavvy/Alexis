@@ -101,15 +101,8 @@ export default function SideBar({
         {/* User and settings buttons */}
         <div className="mt-auto w-full space-y-4 px-2 py-4">
           <button className="flex w-full gap-x-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-light-text transition-colors duration-200 hover:bg-slate-200 focus:outline-none">
-            <ProfilePicture picture={userInfo?.picture} />
-            {(() => {
-              if (!userInfo || !(userInfo.lastName && userInfo.firstName)) {
-                return 'User';
-              }
-              return `${userInfo.firstName || ''} ${
-                userInfo.lastName || ''
-              }`.trim();
-            })()}
+            <ProfilePicture picture={user ? getProfilePicture(user) : ''} />
+            {user ? getFullName(user) : 'Loading...'}
           </button>
         </div>
       </div>

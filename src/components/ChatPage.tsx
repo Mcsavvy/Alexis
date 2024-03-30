@@ -11,6 +11,9 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { saveCurrentThread } from '../utils';
 import { getCurrentThread } from '../utils';
 import socket, { SocketIO, ChatInfo, addHandler } from './Socket';
+import * as Sentry from '@sentry/react';
+import { getFullName } from '../utils';
+import { getProfilePicture } from '../utils';
 
 const API_URL = process.env.API_URL as string;
 const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
@@ -353,7 +356,7 @@ export default function ChatPage() {
             <HumanMessage
               key={index}
               message={msg}
-              picture={userInfo.current?.picture}
+              picture={user ? getProfilePicture(user) : ''}
             />
           ) : (
             <AIMessage
@@ -365,7 +368,7 @@ export default function ChatPage() {
         )}
         <HumanMessage
           message={{ id: '', content: query, type: 'human' }}
-          picture={userInfo.current?.picture}
+          picture={user ? getProfilePicture(user) : ''}
           msgRef={tempHumanMessageRef}
         />
         <AIMessage

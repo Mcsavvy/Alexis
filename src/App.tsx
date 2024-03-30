@@ -6,9 +6,10 @@ import NotSupported from './components/NotSupported';
 import NotLoggedIn from './components/NotLoggedIn';
 import NotProject from './components/NotProject';
 import ChatPage from './components/ChatPage';
-import {getUserInfo, onLoginStatusChange} from "./utils";
+import {UserInfo, getUserInfo, onLoginStatusChange} from "./utils";
 import * as Sentry from '@sentry/react';
 import { isLoggedIn } from './utils';
+import { getFullName } from './utils';
 
 
 Sentry.init({
@@ -96,8 +97,8 @@ function App() {
     } else {
       getUserInfo().then((userInfo) => {
         Sentry.setUser({
-          username: userInfo?.firstName + ' ' + userInfo?.lastName,
-          email: userInfo?.email || undefined,
+          username: getFullName(userInfo),
+          email: userInfo.email,
         });
       });
     }

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.6] - 2024-03-30
+
+### 🚜 Refactor
+
+- Update release script
+
+### ⚙️  Miscellaneous Tasks
+
+- *(ci)* Add extension upload workflow
+
 ## [0.3.5] - 2024-03-30
 
 ### 🚜 Refactor

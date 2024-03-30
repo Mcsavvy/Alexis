@@ -1,0 +1,43 @@
+name: Build & Upload Extension
+
+on:
+  workflow_dispatch:
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.10.0'
+
+      - name: Build Extension
+        run: |
+          npm install
+          npm run build
+          npm run pack
+
+        env:
+          API_URL: ${{ vars.API_URL }}
+          INTRANET_ORIGIN: ${{ vars.INTRANET_ORIGIN }}
+          LOGIN_URL: ${{ vars.LOGIN_URL }}
+          USER_DEFAULT_IMAGE: ${{ vars.USER_DEFAULT_IMAGE }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+
+      - name: Upload To Chrome Web Store
+        uses: mnao305/chrome-extension-upload@v5.0.0
+        with:
+          file-path: release/Alexis-*.zip
+          extension-id: ${{ vars.CHROME_EXTENSION_ID }}
+          client-id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          client-secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          glob: true

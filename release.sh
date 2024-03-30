@@ -46,11 +46,8 @@ previous_branch=$(git rev-parse --abbrev-ref HEAD)
 # else create a new branch
 git checkout dev || git checkout -b dev main
 
-# add a new tag
-git tag -a "v$new_version" -m "v$new_version"
-
 # update the change log
-git-cliff -o CHANGELOG.md
+git-cliff -t "v$new_version" -o CHANGELOG.md
 git add CHANGELOG.md
 
 # update the version in the manifest.json
@@ -59,6 +56,9 @@ git add public/manifest.json
 
 # commit the changes
 git commit --no-verify -m "Release v$new_version 🚀"
+
+# add a new tag
+git tag -a "v$new_version" -m "v$new_version"
 git push -u origin HEAD --tags || exit $?
 
 # Pr to main

@@ -29,8 +29,8 @@ function App() {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [tabId, setTabId] = React.useState(0);
   const [isProject, setIsProject] = React.useState(false);
+  const [user, setUser] = React.useState<UserInfo>(null);
 
-  onLoginStatusChange((loggedIn: boolean) => setLoggedIn(loggedIn));
 
   // @ts-ignore
   chrome.tabs.onUpdated.addListener((changedTabId: number, changeInfo: chrome.tabs.TabChangeInfo) => {
@@ -80,12 +80,13 @@ function App() {
       setTabId(tabs[0].id);
       handleTabUpdate(tabs[0]);
     });
+    onLoginStatusChange((loggedIn: boolean) => setLoggedIn(loggedIn));
   }, []);
 
   useEffect(() => {
     Sentry.withScope(async(scope) => {
       scope.setTransactionName('getLoggedIn');
-      const loggedIn = isLoggedIn();
+      const loggedIn = await isLoggedIn();
       console.log("loggedIn:", loggedIn);
       setLoggedIn(loggedIn || false);
     });
@@ -100,6 +101,7 @@ function App() {
           username: getFullName(userInfo),
           email: userInfo.email,
         });
+        setUser(userInfo);
       });
     }
   }, [loggedIn]);
@@ -111,7 +113,7 @@ function App() {
   } else if (!isProject) {
     return <NotProject />;
   }
-  return <ChatPage />;
+  return <ChatPage user={user} />;
 }
 
 const container = document.getElementById('root');

@@ -3,6 +3,7 @@ const {config: dotenvConfig} = require('dotenv');
 const {DefinePlugin} = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ExtReloader = require('webpack-ext-reloader');
 const PATHS = require('./paths');
 const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 
@@ -71,6 +72,14 @@ const common = (env, argv) => ({
   },
   plugins: [
     // Copy static assets from `public` folder to `build` folder
+    new ExtReloader({
+      manifest: PATHS.manifest,
+      entries: {
+        contentScript: 'contentScript',
+        background: 'background',
+        sidePanel: 'app',
+      }
+    }),
     new CopyWebpackPlugin({
       patterns: [
         {

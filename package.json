@@ -63,6 +63,7 @@
     "typescript": "^5.3.3",
     "webpack": "^5.90.3",
     "webpack-cli": "^4.10.0",
+    "webpack-ext-reloader": "^1.1.12",
     "webpack-merge": "^5.10.0"
   },
   "dependencies": {

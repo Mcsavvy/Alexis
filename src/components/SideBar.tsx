@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { FaPlus } from 'react-icons/fa';
 import { UserInfo, getUserInfo } from '../utils';
+import { getFullName } from '../utils';
+import { getProfilePicture } from '../utils';
 
 const API_URL = process.env.API_URL as string;
 const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
@@ -46,6 +48,7 @@ function ProfilePicture({ picture }: { picture?: string }) {
 }
 
 type SideBarProps = {
+  user: UserInfo | null;
   visible: boolean;
   active: string;
   onClose: () => void;
@@ -54,19 +57,12 @@ type SideBarProps = {
 };
 
 export default function SideBar({
+  user,
   visible,
   history,
   active,
   activateChat,
 }: SideBarProps) {
-  const [userInfo, setUserInfo] = React.useState<UserInfo | null>(null);
-
-  React.useEffect(() => {
-    getUserInfo().then((info) => {
-      setUserInfo(info);
-    });
-  }, []);
-
   return (
     <div
       style={{ width: 'fit-content', display: visible ? 'block' : 'none' }}
@@ -101,15 +97,8 @@ export default function SideBar({
         {/* User and settings buttons */}
         <div className="mt-auto w-full space-y-4 px-2 py-4">
           <button className="flex w-full gap-x-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-light-text transition-colors duration-200 hover:bg-slate-200 focus:outline-none">
-            <ProfilePicture picture={userInfo?.picture} />
-            {(() => {
-              if (!userInfo || !(userInfo.lastName && userInfo.firstName)) {
-                return 'User';
-              }
-              return `${userInfo.firstName || ''} ${
-                userInfo.lastName || ''
-              }`.trim();
-            })()}
+            <ProfilePicture picture={user ? getProfilePicture(user) : ''} />
+            {user ? getFullName(user) : 'Loading...'}
           </button>
         </div>
       </div>

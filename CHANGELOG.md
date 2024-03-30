@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.5] - 2024-03-30
+
+### 🚜 Refactor
+
+- Use new utility functions
+- Synchronize user detail among components
+
+### ⚙️  Miscellaneous Tasks
+
+- Added new utility functions
+- Add plugin for hot-reloading
+
 ## [0.3.4] - 2024-03-25
 
 ### ⚙️  Miscellaneous Tasks

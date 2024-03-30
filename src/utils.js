@@ -123,8 +123,10 @@ export function onLoginStatusChange(callback) {
  * @returns
  */
 export async function handleCookieChange(changeInfo) {
-  if (changeInfo.cookie.domain !== 'alexis.futurdevs.tech') return;
-  if (changeInfo.cookie.name !== 'access_token') return;
+  const webUrl = new URL(process.env.WEB_URL);
+  const cookieName = process.env.ACCESS_TOKEN_COOKIE_NAME;
+  if (changeInfo.cookie.domain !== webUrl.host) return;
+  if (changeInfo.cookie.name !== cookieName) return;
   clearUserInfo()
   setLoggedIn(!changeInfo.removed)
   authenticate()
@@ -147,4 +149,26 @@ export async function saveCurrentThread(threadId, project) {
 export async function getCurrentThread(project) {
   const threadId = (await chrome.storage.local.get(`${project}.currentThread`))[`${project}.currentThread`]
   return threadId
+}
+
+/**
+ *
+ * @param {UserInfo} userInfo
+ * @returns {string}
+ */
+export function getFullName(userInfo) {
+  let fullName = ''
+  if (userInfo.firstName) fullName += userInfo.firstName
+  if (userInfo.lastName) fullName += ` ${userInfo.lastName}`
+  fullName = fullName.trim();
+  return fullName.length > 0 ? fullName : 'Unknown'
+}
+
+/**
+ * @param {UserInfo} userInfo
+ * @returns {string}
+ */
+export function getProfilePicture(userInfo) {
+  if (userInfo.picture) return userInfo.picture;
+  return process.env.USER_DEFAULT_IMAGE;
 }

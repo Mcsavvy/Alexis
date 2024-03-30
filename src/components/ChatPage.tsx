@@ -11,11 +11,12 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { saveCurrentThread } from '../utils';
 import { getCurrentThread } from '../utils';
 import socket, { SocketIO, ChatInfo, addHandler } from './Socket';
+import * as Sentry from '@sentry/react';
+import { getFullName } from '../utils';
+import { getProfilePicture } from '../utils';
 
 const API_URL = process.env.API_URL as string;
-const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
 const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;
-import * as Sentry from '@sentry/react';
 
 const Components: Components = {
   a: ({ node, href, ...props }) => {
@@ -43,7 +44,7 @@ export function HumanMessage({ message, picture, msgRef }: HumanMessageProps) {
     <div className="flex flex-row px-4 py-8 sm:px-6" ref={msgRef}>
       <img
         className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
-        src={picture || USER_DEFAULT_IMAGE}
+        src={picture}
       />
 
       <div className="flex max-w-3xl items-center">
@@ -129,14 +130,17 @@ type ChatMessage = {
   type: 'human' | 'ai';
 };
 
-export default function ChatPage() {
+type ChatPageProps = {
+  user?: UserInfo;
+}
+
+export default function ChatPage({ user }: ChatPageProps) {
   const [project, setProject] = React.useState('');
   const [chatHistory, setChatHistory] = React.useState<ChatHistoryDisplay[]>(
     []
   );
   const queryIdRef = React.useRef('fakeQueryID');
   const responseIdRef = React.useRef('fakeResponseID');
-  const userInfo = React.useRef<UserInfo | null>(null);
   const [response, _setResponse] = React.useState('');
   const [query, _setQuery] = React.useState('');
   const responseRef = React.useRef(response);
@@ -260,10 +264,9 @@ export default function ChatPage() {
     const projectId = url.pathname.match(/^\/projects\/(\d+)/)[1];
     setProject(projectId);
     Sentry.setTag('projectId', projectId);
-    userInfo.current = await getUserInfo();
-    Sentry.setUser({
-      username: userInfo.current.firstName + ' ' + userInfo.current.lastName,
-      email: userInfo.current.email,
+    user && Sentry.setUser({
+      username: getFullName(user),
+      email: user.email,
     });
     const threads = await fetchThreads(projectId);
     setChatHistory([
@@ -324,6 +327,7 @@ export default function ChatPage() {
       {/* SideBar */}
       <SocketIO />
       <SideBar
+        user={user}
         visible={showSidebar}
         history={chatHistory}
         onClose={() => setShowSidebar(false)}
@@ -353,7 +357,7 @@ export default function ChatPage() {
             <HumanMessage
               key={index}
               message={msg}
-              picture={userInfo.current?.picture}
+              picture={user ? getProfilePicture(user) : ''}
             />
           ) : (
             <AIMessage
@@ -365,7 +369,7 @@ export default function ChatPage() {
         )}
         <HumanMessage
           message={{ id: '', content: query, type: 'human' }}
-          picture={userInfo.current?.picture}
+          picture={user ? getProfilePicture(user) : ''}
           msgRef={tempHumanMessageRef}
         />
         <AIMessage

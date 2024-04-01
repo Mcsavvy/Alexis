@@ -1,6 +1,30 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-const API_URL = process.env.API_URL;
+/**@type {import("./utils").Environ} */
+export const environ = process.env;
+
+// validate environ
+function validateEnviron() {
+  const keys = [
+    'API_URL',
+    'INTRANET_ORIGIN',
+    'WEB_URL',
+    'LOGIN_URL',
+    'ACCESS_TOKEN_COOKIE_NAME',
+    'USER_DEFAULT_IMAGE',
+    'SENTRY_AUTH_TOKEN',
+    'SENTRY_DSN',
+  ];
+  for (const key of keys) {
+    if (!environ[key]) {
+      throw new Error(`Missing environment variable: '${key}'`);
+    }
+  }
+}
+
+validateEnviron();
+
+const API_URL = environ.API_URL;
 
 /**
  * @typedef {{
@@ -123,8 +147,8 @@ export function onLoginStatusChange(callback) {
  * @returns
  */
 export async function handleCookieChange(changeInfo) {
-  const webUrl = new URL(process.env.WEB_URL);
-  const cookieName = process.env.ACCESS_TOKEN_COOKIE_NAME;
+  const webUrl = new URL(environ.WEB_URL);
+  const cookieName = environ.ACCESS_TOKEN_COOKIE_NAME;
   if (changeInfo.cookie.domain !== webUrl.host) return;
   if (changeInfo.cookie.name !== cookieName) return;
   clearUserInfo()
@@ -170,5 +194,5 @@ export function getFullName(userInfo) {
  */
 export function getProfilePicture(userInfo) {
   if (userInfo.picture) return userInfo.picture;
-  return process.env.USER_DEFAULT_IMAGE;
+  return environ.USER_DEFAULT_IMAGE;
 }

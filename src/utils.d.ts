@@ -5,6 +5,17 @@ export type UserInfo = {
   email: string | null;
   picture: string | null;
 };
+export type Environ = {
+  API_URL: string;
+  INTRANET_ORIGIN: string;
+  WEB_URL: string;
+  LOGIN_URL: string;
+  ACCESS_TOKEN_COOKIE_NAME: string;
+  USER_DEFAULT_IMAGE: string;
+  SENTRY_AUTH_TOKEN: string;
+  SENTRY_DSN: string;
+};
+export const environ: Environ;
 export type LoginStatusChangeCallback = (loggedIn: boolean) => void;
 export const onLoginStatusChange: (callback: LoginStatusChangeCallback) => void;
 export const getMe: () => UserInfo;

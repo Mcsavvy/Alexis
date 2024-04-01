@@ -20,21 +20,22 @@ jobs:
         with:
           node-version: '20.10.0'
 
+      - name: Create .env file
+        run: |
+          echo "API_URL=${{ vars.API_URL }}" >> .env
+          echo "INTRANET_ORIGIN=${{ vars.INTRANET_ORIGIN }}" >> .env
+          echo "WEB_URL=${{ vars.WEB_URL }}" >> .env
+          echo "LOGIN_URL=${{ vars.LOGIN_URL }}" >> .env
+          echo "ACCESS_TOKEN_COOKIE_NAME=${{ vars.ACCESS_TOKEN_COOKIE_NAME }}" >> .env
+          echo "USER_DEFAULT_IMAGE=${{ vars.USER_DEFAULT_IMAGE }}" >> .env
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env
+          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
+
       - name: Build Extension
         run: |
           npm install
           npm run build
           npm run pack
-
-        env:
-          API_URL: ${{ vars.API_URL }}
-          INTRANET_ORIGIN: ${{ vars.INTRANET_ORIGIN }}
-          WEB_URL: ${{ vars.WEB_URL }}
-          LOGIN_URL: ${{ vars.LOGIN_URL }}
-          ACCESS_TOKEN_COOKIE_NAME: ${{ vars.ACCESS_TOKEN_COOKIE_NAME }}
-          USER_DEFAULT_IMAGE: ${{ vars.USER_DEFAULT_IMAGE }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Generate release notes
         id: release_notes

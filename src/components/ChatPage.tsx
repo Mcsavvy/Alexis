@@ -5,7 +5,7 @@ import { LuArrowUpSquare } from 'react-icons/lu';
 // import { FiThumbsUp, FiThumbsDown, FiSidebar } from 'react-icons/fi';
 // import { MdContentCopy } from 'react-icons/md';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
-import { UserInfo, getAccessToken, getUserInfo } from '../utils';
+import { UserInfo, environ, getAccessToken, getUserInfo } from '../utils';
 import Markdown, { Components } from 'react-markdown';
 import TextareaAutosize from 'react-textarea-autosize';
 import { saveCurrentThread } from '../utils';
@@ -15,8 +15,8 @@ import * as Sentry from '@sentry/react';
 import { getFullName } from '../utils';
 import { getProfilePicture } from '../utils';
 
-const API_URL = process.env.API_URL as string;
-const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;
+const API_URL = environ.API_URL;
+const INTRANET_ORIGIN = environ.INTRANET_ORIGIN;
 
 const Components: Components = {
   a: ({ node, href, ...props }) => {

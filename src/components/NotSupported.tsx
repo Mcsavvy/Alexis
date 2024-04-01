@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { FaExclamationTriangle } from 'react-icons/fa'
+import { environ } from '../utils';
 
 export default function NotSupported() {
   return (
@@ -11,7 +12,7 @@ export default function NotSupported() {
       <p className="mb-4">
         Please go to the following URL to work with the extension:
       </p>
-      <a href={process.env.INTRANET_ORIGIN as string} className="text-blue-500 underline">
+      <a href={environ.INTRANET_ORIGIN} className="text-blue-500 underline">
         intranet.alxswe
       </a>
     </div>

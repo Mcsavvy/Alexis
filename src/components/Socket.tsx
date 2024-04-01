@@ -1,8 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 import * as React from 'react';
-import { getAccessToken } from '../utils';
+import { environ, getAccessToken } from '../utils';
 
-const socket = io(process.env.API_URL, {
+const socket = io(environ.API_URL, {
   autoConnect: false,
   transports: ['websocket'],
 });

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.7] - 2024-04-01
+
+### 🐛 Bug Fixes
+
+- *(workflow)* Add missing env variables
+
+### 🚜 Refactor
+
+- Get envvars from utils
+
+### ⚙️  Miscellaneous Tasks
+
+- Validate environment variables
+
 ## [0.3.6] - 2024-03-30
 
 ### 🚜 Refactor

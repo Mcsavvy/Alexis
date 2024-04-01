@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.8] - 2024-04-01
+
+### ⚙️  Miscellaneous Tasks
+
+- Add env validate plugin for webpack
+- Fixed env var plugin
 
 ## [0.3.7] - 2024-04-01
 
@@ -16,7 +22,6 @@ All notable changes to this project will be documented in this file.
 ### ⚙️  Miscellaneous Tasks
 
 - Validate environment variables
-
 
 ## [0.3.6] - 2024-03-30
 

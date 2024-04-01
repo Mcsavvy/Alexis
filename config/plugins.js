@@ -1,4 +1,4 @@
-export class EnvValidatePlugin {
+class EnvValidatePlugin {
   /**
    * @param {import('webpack').Compiler} compiler
    */
@@ -13,10 +13,16 @@ export class EnvValidatePlugin {
       'SENTRY_AUTH_TOKEN',
       'SENTRY_DSN',
     ];
+    console.log(`Validating environment variables`);
     for (const key of keys) {
+      console.log(`>  ${key}=${process.env[key]}`);
       if (!process.env[key]) {
         throw new Error(`Missing environment variable: '${key}'`);
       }
     }
   }
+}
+
+module.exports = {
+  EnvValidatePlugin
 }

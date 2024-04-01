@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ExtReloader = require('webpack-ext-reloader');
 const PATHS = require('./paths');
 const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
+const { EnvValidatePlugin } = require('./plugins');
 
 // used in the module rules and in the stats exlude list
 const IMAGE_TYPES = /\.(png|jpe?g|gif|svg)$/i;
@@ -71,7 +72,9 @@ const common = (env, argv) => ({
     extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
-    // Copy static assets from `public` folder to `build` folder
+    // validate the environment variables
+    new EnvValidatePlugin(),
+    // Reload the extension on file changes
     new ExtReloader({
       manifest: PATHS.manifest,
       entries: {
@@ -80,6 +83,7 @@ const common = (env, argv) => ({
         sidePanel: 'app',
       }
     }),
+    // Copy static assets from `public` folder to `build` folder
     new CopyWebpackPlugin({
       patterns: [
         {

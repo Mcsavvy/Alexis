@@ -3,27 +3,6 @@
 /**@type {import("./utils").Environ} */
 export const environ = process.env;
 
-// validate environ
-function validateEnviron() {
-  const keys = [
-    'API_URL',
-    'INTRANET_ORIGIN',
-    'WEB_URL',
-    'LOGIN_URL',
-    'ACCESS_TOKEN_COOKIE_NAME',
-    'USER_DEFAULT_IMAGE',
-    'SENTRY_AUTH_TOKEN',
-    'SENTRY_DSN',
-  ];
-  for (const key of keys) {
-    if (!environ[key]) {
-      throw new Error(`Missing environment variable: '${key}'`);
-    }
-  }
-}
-
-validateEnviron();
-
 const API_URL = environ.API_URL;
 
 /**

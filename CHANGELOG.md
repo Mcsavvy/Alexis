@@ -2,6 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
+
 ## [0.3.7] - 2024-04-01
 
 ### 🐛 Bug Fixes
@@ -15,6 +16,7 @@ All notable changes to this project will be documented in this file.
 ### ⚙️  Miscellaneous Tasks
 
 - Validate environment variables
+
 
 ## [0.3.6] - 2024-03-30
 

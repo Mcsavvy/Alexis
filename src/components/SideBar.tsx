@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { FaPlus } from 'react-icons/fa';
-import { UserInfo, getUserInfo } from '../utils';
+import { UserInfo, environ, getUserInfo } from '../utils';
 import { getFullName } from '../utils';
 import { getProfilePicture } from '../utils';
 
-const API_URL = process.env.API_URL as string;
-const USER_DEFAULT_IMAGE = process.env.USER_DEFAULT_IMAGE as string;
+const API_URL = environ.API_URL;
+const USER_DEFAULT_IMAGE = environ.USER_DEFAULT_IMAGE;
 
 export type Thread = {
   id: string;

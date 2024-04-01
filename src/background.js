@@ -1,10 +1,10 @@
 'use strict';
-import {handleCookieChange, authenticate} from "./utils";
+import {handleCookieChange, authenticate, environ} from "./utils";
 import * as Sentry from '@sentry/browser';
 
 
-const API_URL = process.env.API_URL;
-const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN;
+const API_URL = environ.API_URL;
+const INTRANET_ORIGIN = environ.INTRANET_ORIGIN;
 
 Sentry.WINDOW.document = {
   visibilityState: 'hidden',
@@ -12,7 +12,7 @@ Sentry.WINDOW.document = {
 };
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
+  dsn: environ.SENTRY_DSN,
   tracesSampleRate: 1.0,
   integrations: [Sentry.browserTracingIntegration()],
 });

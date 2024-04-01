@@ -7,15 +7,16 @@ import scrapeProject ,{
   getProjectTasks,
 } from './scraper';
 import * as Sentry from '@sentry/browser';
+import { environ } from './utils';
 
 
 const PROJECT_PAT = /\/projects\/\d+/;
-const API_URL = process.env.API_URL;
+const API_URL = environ.API_URL;
 
 
 window.addEventListener('load', function () {
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    dsn: environ.SENTRY_DSN,
     tracesSampleRate: 1.0,
   });
 });

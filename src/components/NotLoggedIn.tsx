@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { FaExclamationTriangle } from 'react-icons/fa';
+import { environ } from '../utils';
 
 export default function NotLoggedIn() {
-  const loginUrl = process.env.LOGIN_URL as string;
+  const loginUrl = environ.LOGIN_URL;
 
   const handleLogin = () => {
     window.open(loginUrl, '_blank');

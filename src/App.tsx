@@ -8,12 +8,11 @@ import NotProject from './components/NotProject';
 import ChatPage from './components/ChatPage';
 import {UserInfo, getUserInfo, onLoginStatusChange} from "./utils";
 import * as Sentry from '@sentry/react';
-import { isLoggedIn } from './utils';
-import { getFullName } from './utils';
+import { isLoggedIn, getFullName, environ } from './utils';
 
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
+  dsn: environ.SENTRY_DSN,
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration()
@@ -22,7 +21,7 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
 });
 
-const INTRANET_ORIGIN = process.env.INTRANET_ORIGIN as string;
+const INTRANET_ORIGIN = environ.INTRANET_ORIGIN;
 
 function App() {
   const [supported, setSupported] = React.useState(true);

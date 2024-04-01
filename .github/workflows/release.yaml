@@ -29,7 +29,9 @@ jobs:
         env:
           API_URL: ${{ vars.API_URL }}
           INTRANET_ORIGIN: ${{ vars.INTRANET_ORIGIN }}
+          WEB_URL: ${{ vars.WEB_URL }}
           LOGIN_URL: ${{ vars.LOGIN_URL }}
+          ACCESS_TOKEN_COOKIE_NAME: ${{ vars.ACCESS_TOKEN_COOKIE_NAME }}
           USER_DEFAULT_IMAGE: ${{ vars.USER_DEFAULT_IMAGE }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}

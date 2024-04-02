@@ -12,6 +12,8 @@ class EnvValidatePlugin {
       'USER_DEFAULT_IMAGE',
       'SENTRY_AUTH_TOKEN',
       'SENTRY_DSN',
+      'NODE_ENV',
+      'SENTRY_ENABLED',
     ];
     console.log(`Validating environment variables`);
     for (const key of keys) {

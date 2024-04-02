@@ -35,6 +35,10 @@ jobs:
           npm run build
           npm run pack
 
+        env:
+          NODE_ENV: production
+          SENTRY_ENABLED: true
+
       - name: Upload To Chrome Web Store
         uses: mnao305/chrome-extension-upload@v5.0.0
         with:

@@ -16,9 +16,9 @@ if [ -z "$(command -v gh)" ]; then
   exit 1
 fi
 
-# check if the manifest.json file exists
-if [ ! -f public/manifest.json ]; then
-  echo "manifest.json not found." >&2
+# check if the package.json file exists
+if [ ! -f package.json ]; then
+  echo "package.json not found." >&2
   exit 1
 fi
 
@@ -50,9 +50,9 @@ git checkout dev || git checkout -b dev main
 git-cliff -t "v$new_version" -o CHANGELOG.md
 git add CHANGELOG.md
 
-# update the version in the manifest.json
-sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" public/manifest.json
-git add public/manifest.json
+# update the version in package.json
+sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" package.json
+git add package.json
 
 # commit the changes
 git commit --no-verify -m "Release v$new_version 🚀"

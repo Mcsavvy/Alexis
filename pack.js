@@ -1,6 +1,7 @@
 const { readFileSync, existsSync, mkdirSync } = require('fs');
 const { parse, resolve } = require('path');
 const AdmZip = require('adm-zip');
+const nodeEnv = process.env.NODE_ENV;
 
 try {
   const { base } = parse(__dirname);
@@ -9,7 +10,10 @@ try {
   );
 
   const outdir = 'release';
-  const filename = `${base}-v${version}.zip`;
+  const filename =
+    nodeEnv === 'development'
+      ? `${base}-Insiders-v${version}.zip`
+      : `${base}-v${version}.zip`;
   const zip = new AdmZip();
   zip.addLocalFolder('build');
   if (!existsSync(outdir)) {

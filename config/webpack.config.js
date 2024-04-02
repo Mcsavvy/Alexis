@@ -6,8 +6,8 @@ const common = require('./webpack.common.js');
 const PATHS = require('./paths');
 
 // Merge webpack configuration files
-const config = (env, argv) =>
-  merge(common(env, argv), {
+const config = (env, argv) => {
+  return merge(common(env, argv), {
     devtool: 'source-map',
     entry: {
       app: PATHS.src + '/App.tsx',
@@ -15,5 +15,6 @@ const config = (env, argv) =>
       background: PATHS.src + '/background.js',
     },
   });
+}
 
 module.exports = config;

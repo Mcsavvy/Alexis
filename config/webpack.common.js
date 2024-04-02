@@ -1,6 +1,6 @@
 'use strict';
-const {config: dotenvConfig} = require('dotenv');
-const {DefinePlugin} = require('webpack');
+const { config: dotenvConfig } = require('dotenv');
+const { DefinePlugin } = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ExtReloader = require('webpack-ext-reloader');
@@ -8,13 +8,44 @@ const PATHS = require('./paths');
 const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 const { EnvValidatePlugin } = require('./plugins');
 
+const enableSentry = process.env.SENTRY_ENABLED === 'true';
+const version = require('../package.json').version;
+const nodeEnv = process.env.NODE_ENV;
+
+/**
+ * Transform the manifest.json file
+ * @param {string} mode
+ * @param {Buffer} content
+ * @returns
+ */
+function transformManifest(mode, content) {
+  const manifest = JSON.parse(content.toString());
+  manifest.version = version;
+  if (nodeEnv === 'development') {
+    // Development mode
+    if (mode === 'development') {
+      // watch mode
+      manifest.name += '(dev)';
+    } else {
+      // build mode
+      manifest.name += ' Insiders';
+    }
+  } else {
+    // Production mode
+    if (mode.includes('development')) {
+      // watch mode
+      manifest.name += '(staging)';
+    } else {
+      // build mode
+      manifest.name += '';
+    }
+  }
+  return JSON.stringify(manifest, null, 2);
+}
+
 // used in the module rules and in the stats exlude list
 const IMAGE_TYPES = /\.(png|jpe?g|gif|svg)$/i;
 
-// To re-use webpack configuration across templates,
-// CLI maintains a common webpack configuration file - `webpack.common.js`.
-// Whenever user creates an extension, CLI adds `webpack.common.js` file
-// in template's `config` folder
 const common = (env, argv) => ({
   output: {
     // the build folder to output bundles and assets in.
@@ -72,7 +103,7 @@ const common = (env, argv) => ({
     extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
-    // validate the environment variables
+    // Validate the environment variables
     new EnvValidatePlugin(),
     // Reload the extension on file changes
     new ExtReloader({
@@ -81,14 +112,17 @@ const common = (env, argv) => ({
         contentScript: 'contentScript',
         background: 'background',
         sidePanel: 'app',
-      }
+      },
     }),
     // Copy static assets from `public` folder to `build` folder
+    // and transform the manifest.json file
     new CopyWebpackPlugin({
       patterns: [
+        { from: '**/*', context: 'public' },
         {
-          from: '**/*',
-          context: 'public',
+          from: PATHS.manifest,
+          to: PATHS.build + '/manifest.json',
+          transform: transformManifest.bind(null, [env]),
         },
       ],
     }),
@@ -97,15 +131,19 @@ const common = (env, argv) => ({
       filename: '[name].css',
     }),
     // .env variables
-    new DefinePlugin({
-      'process.env': JSON.stringify(dotenvConfig().parsed),
-    }),
+    new DefinePlugin({ 'process.env': JSON.stringify(dotenvConfig().parsed) }),
     sentryWebpackPlugin({
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: 'futurdevs',
       project: 'alexis-ui',
       telemetry: false,
-      disable: argv.mode === 'development',
+      disable: argv.mode === 'development' || !enableSentry,
+      release: {
+        name:
+          nodeEnv === 'development'
+            ? `alexis-ui@${version}-dev`
+            : `alexis-ui@${version}`,
+      },
     }),
   ],
 });

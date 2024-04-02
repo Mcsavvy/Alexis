@@ -37,6 +37,10 @@ jobs:
           npm run build
           npm run pack
 
+        env:
+          NODE_ENV: development
+          SENTRY_ENABLED: true
+
       - name: Generate release notes
         id: release_notes
         uses: orhun/git-cliff-action@v3

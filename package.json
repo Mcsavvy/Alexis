@@ -1,8 +1,7 @@
 {
   "name": "alexis",
-  "version": "1.0.0",
+  "version": "0.3.10",
   "description": "Empower Your Code, Enlighten Your ALX Path.",
-  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mcsavvy/alexis.git"

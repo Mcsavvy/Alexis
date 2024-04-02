@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.10] - 2024-04-02
+
+### ⚙️  Miscellaneous Tasks
+
+- Moved manifest to src
+- Add new environment variables
+- Track version using package.json
+- Update file paths and manifest.json
+
 ## [0.3.9] - 2024-04-01
 
 ### 🐛 Bug Fixes

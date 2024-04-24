@@ -76,14 +76,13 @@ export default function SideBar({
         {/* New chat button */}
         <div className="mx-2 mt-8">
           <button
-            onClick={() => activateChat('new-chat')}
-            className="flex w-full gap-x-4 rounded-lg border border-light-primary text-light-primary p-4 text-left text-sm font-medium transition-colors duration-200 hover:bg-light-primary hover:text-dark-text focus:outline-none">
+            className="flex w-full gap-x-4 rounded-lg border border-alx-red text-alx-red p-4 text-left text-sm font-medium transition-colors duration-200 hover:bg-alx-red hover:text-dark-text focus:outline-none">
             <FaPlus />
             New Chat
           </button>
         </div>
         {/* Previous chats container */}
-        <div className="h-[80vh] space-y-4 overflow-y-auto border-b border-light-label-default px-2 py-4">
+        <div className="h-[80vh] space-y-4 overflow-y-auto border-b border-gray-500 px-2 py-4">
           {history.map((thread, index) => (thread.display ? (
             <ChatHistory
               key={index}
@@ -96,7 +95,7 @@ export default function SideBar({
         </div>
         {/* User and settings buttons */}
         <div className="mt-auto w-full space-y-4 px-2 py-4">
-          <button className="flex w-full gap-x-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-light-text transition-colors duration-200 hover:bg-slate-200 focus:outline-none">
+          <button className="flex w-full gap-x-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-black transition-colors duration-200 hover:bg-slate-200 focus:outline-none">
             <ProfilePicture picture={user ? getProfilePicture(user) : ''} />
             {user ? getFullName(user) : 'Loading...'}
           </button>

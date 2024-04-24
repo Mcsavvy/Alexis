@@ -16,7 +16,7 @@ export default function NotLoggedIn() {
       <p className="mb-4">Please log in to access this page.</p>
       <button
         onClick={handleLogin}
-        className="bg-light-primary text-white gap-y-2 rounded-lg px-3 py-2 text-center"
+        className="bg-alx-red text-white gap-y-2 rounded-lg px-3 py-2 text-center"
       >
         Login
       </button>

@@ -72,13 +72,13 @@ export function AIMessage({ message, msgRef}: AIMessageProps) {
           {message.content}
         </Markdown>
         {/* <div className="mt-4 flex flex-row justify-start gap-x-2 text-slate-500 lg:mt-0">
-          <button className="hover:text-light-primary">
+          <button className="hover:text-alx-red">
             <FiThumbsUp />
           </button>
-          <button className="hover:text-light-primary" type="button">
+          <button className="hover:text-alx-red" type="button">
             <FiThumbsDown />
           </button>
-          <button className="hover:text-light-primary" type="button">
+          <button className="hover:text-alx-red" type="button">
             <MdContentCopy />
           </button>
         </div> */}
@@ -335,23 +335,14 @@ export default function ChatPage({ user }: ChatPageProps) {
         activateChat={setActiveChatID}
       />
       {/* Navbar */}
-      <nav className="flex items-center justify-between p-4 bg-slate-100 text-black shadow-lg">
-        <div className="flex items-center">
+      <nav className="flex items-center justify-between p-4 border-b border-gray-500 text-black shadow-lg">
           <img src="/icons/icon48.png" alt="Logo" className="mr-2 h-8 w-8" />{' '}
-          <h1 className="text-lg font-medium text-light-text">
-            {activeThread ? activeThread.title : 'Loading...'}
-          </h1>{' '}
-        </div>
-        <button
-          onClick={() => setShowSidebar(!showSidebar)}
-          className=" hover:text-light-primary"
-        >
-          <FiSidebar className="w-5 h-5" />
+        <h1 className="text-lg font-medium text-black">
         </button>
       </nav>
 
       {/* Prompt Messages */}
-      <div className="flex-1 overflow-y-auto pb-20 bg-light-panel text-sm leading-6 text-slate-900 shadow-md sm:text-base sm:leading-7">
+      <div className="flex-1 overflow-y-auto pb-2 bg-white text-sm leading-6 text-slate-900 sm:text-base sm:leading-7">
         {messages.map((msg, index) =>
           msg.type === 'human' ? (
             <HumanMessage

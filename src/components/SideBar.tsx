@@ -27,10 +27,10 @@ function ChatHistory(props: ChatHistoryProps & { active: boolean }) {
       onClick={() => props.activateChat(props.id)}
       className={
         'flex w-full flex-col gap-y-2 rounded-lg px-3 py-2 text-left transition-colors duration-200 hover:bg-slate-200 focus:outline-none' +
-        (props.active ? ' border-l-4 shadow-lg border-light-primary' : '')
+        (props.active ? ' border-l-4 shadow-lg border-alx-red' : '')
       }
     >
-      <h1 className="text-sm font-medium capitalize text-light-text">
+      <h1 className="text-sm font-medium capitalize text-white">
         {props.title}
       </h1>
     </button>
@@ -71,7 +71,7 @@ export default function SideBar({
       <div className="flex h-[100vh] w-60 flex-col overflow-y-auto bg-slate-50 pt-4 sm:h-[100vh] sm:w-64">
         <div className="flex px-4">
           <img src="/icons/icon48.png" alt="Logo" className="mr-2 h-8 w-8" />{' '}
-          <h1 className="text-lg font-medium text-light-text">History</h1>
+          <h1 className="text-lg font-medium text-black">History</h1>
         </div>
         {/* New chat button */}
         <div className="mx-2 mt-8">

@@ -1,9 +1,5 @@
 import * as React from 'react';
 import { FiSidebar } from 'react-icons/fi';
-import { CgSpinner } from 'react-icons/cg';
-import { LuArrowUpSquare } from 'react-icons/lu';
-// import { FiThumbsUp, FiThumbsDown, FiSidebar } from 'react-icons/fi';
-// import { MdContentCopy } from 'react-icons/md';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
 import { UserInfo, environ, getAccessToken, getUserInfo } from '../utils';
 import Markdown, { Components } from 'react-markdown';
@@ -14,6 +10,7 @@ import socket, { SocketIO, ChatInfo, addHandler } from './Socket';
 import * as Sentry from '@sentry/react';
 import { getFullName } from '../utils';
 import { getProfilePicture } from '../utils';
+import PromptInput from './PromptInput';
 
 const API_URL = environ.API_URL;
 const INTRANET_ORIGIN = environ.INTRANET_ORIGIN;
@@ -368,50 +365,15 @@ export default function ChatPage({ user }: ChatPageProps) {
           msgRef={tempAIMessageRef}
         />
       </div>
-
-      {/* Prompt message input */}
-      <form className="fixed bottom-0 left-0 right-0  flex w-full items-end rounded-b-md border-t border-slate-300 bg-slate-200 p-2">
-        <label htmlFor="chat" className="sr-only">
-          Enter your prompt
-        </label>
-        <TextareaAutosize
-          id="chat"
-          value={input}
-          readOnly={typing}
-          onChange={(e) => setInput(e.target.value)}
-          className="flex-1 min-h-full w-full rounded-md border border-slate-300 bg-slate-50 p-2 text-base text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
-          placeholder={
-            activeThread
-              ? activeThread.id == 'new-chat'
-                ? `What's on your mind?`
-                : `Talking about ${activeThread.title}`
-              : 'Ready to chat?'
-          }
-          // send message on ctrl+enter
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-        />
-        <div>
-          <button
-            disabled={!input || typing}
-            onClick={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="inline-flex sm:p-2"
-          >
-            {typing ? (
-              <CgSpinner className="animate-spin h-8 w-8 text-light-primary" />
-            ) : (
-              <LuArrowUpSquare className="w-8 h-8" />
-            )}
-          </button>
-        </div>
-      </form>
+<PromptInput
+        sendQuery={handleSend}
+        stopGenerating={() => {}}
+        input={input}
+        setInput={setInput}
+        generating={typing}
+        setGenerating={setTyping}
+        setShowSidebar={setShowSidebar}
+      />
     </div>
   );
 }

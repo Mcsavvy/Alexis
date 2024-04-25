@@ -75,6 +75,9 @@ li {
   text-align: -webkit-match-parent;
 }
 
+textarea#chat {
+  padding-right: 8%;
+}
 
 .chat-message h1 {
   font-size: 1.125rem;
@@ -164,4 +167,8 @@ li {
 
 .dark ::-webkit-scrollbar-thumb:hover {
     background-color: hsla(0,0%,100%,.3)
+}
+
+textarea::-webkit-scrollbar {
+  width: 0px;
 }

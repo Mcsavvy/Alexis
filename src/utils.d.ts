@@ -14,6 +14,8 @@ export type Environ = {
   USER_DEFAULT_IMAGE: string;
   SENTRY_AUTH_TOKEN: string;
   SENTRY_DSN: string;
+  NODE_ENV: string;
+  SENTRY_ENABLED: string;
 };
 export const environ: Environ;
 export type LoginStatusChangeCallback = (loggedIn: boolean) => void;
@@ -31,3 +33,4 @@ export const saveCurrentThread: (threadId: string, project: string) => Promise<v
 export const getFullName: (userInfo: UserInfo) => string;
 export const getProfilePicture: (userInfo: UserInfo) => string;
 export const getCurrentThread: (project: string) => Promise<string | null>;
+export const getVersion: () => string;

@@ -334,6 +334,8 @@ export default function ChatPage({ user }: ChatPageProps) {
       <nav className="flex items-center justify-between p-4 border-b border-gray-500 text-black shadow-lg">
           <img src="/icons/icon48.png" alt="Logo" className="mr-2 h-8 w-8" />{' '}
         <h1 className="text-lg font-medium text-black">
+        <button onClick={() => setActiveChatID('new-chat')} title="New Chat">
+          <FiEdit className="w-5 h-5 hover:text-primary text-black" />
         </button>
       </nav>
 

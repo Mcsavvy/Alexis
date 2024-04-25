@@ -17,9 +17,8 @@ const INTRANET_ORIGIN = environ.INTRANET_ORIGIN;
 
 const Components: Components = {
   a: ({ node, href, ...props }) => {
-    const url = new URL(href);
-    if (url.origin === 'https://rltoken') {
-      href = INTRANET_ORIGIN + '/rltoken' + url.pathname;
+    if (href.startsWith('/')) {
+      href = INTRANET_ORIGIN + href;
     }
     return <a href={href} {...props} target="_blank" />;
   },

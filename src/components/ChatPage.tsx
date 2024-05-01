@@ -43,7 +43,7 @@ export function HumanMessage({ message, picture, msgRef }: HumanMessageProps) {
         className="mr-2 flex h-5 w-5 rounded-full mt-1 border border-gray-300"
         src={picture}
       />
-  <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
+      <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
         <h5 className="font-bold">You</h5>
         <Markdown className="chat-message human-chat" components={Components}>
           {message.content}
@@ -60,8 +60,8 @@ export function AIMessage({ message, msgRef }: AIMessageProps) {
         className="mr-2 flex h-5 w-5 rounded-full mt-1 border border-gray-300"
         src="/icons/icon48.png"
       />
-<div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
-<h5 className='font-bold'>Alexis</h5>
+      <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
+        <h5 className='font-bold'>Alexis</h5>
         <Markdown
           className="max-w-3xl chat-message ai-chat"
           components={Components}
@@ -129,7 +129,7 @@ type ChatMessage = {
 
 type ChatPageProps = {
   user?: UserInfo;
-}
+};
 
 export default function ChatPage({ user }: ChatPageProps) {
   const [project, setProject] = React.useState('');
@@ -198,6 +198,8 @@ export default function ChatPage({ user }: ChatPageProps) {
           id: info.thread_id,
           title: info.thread_title,
           project: project,
+          created_at: info.thread_created_at,
+          description: info.thread_description,
         };
         setActiveChatID(thread.id);
         setChatHistory((history) => [
@@ -234,6 +236,14 @@ export default function ChatPage({ user }: ChatPageProps) {
       { id: queryIdRef.current, content: humanQuery, type: 'human' },
       { id: responseIdRef.current, content: aiResponse, type: 'ai' },
     ]);
+    setChatHistory((history) =>
+      history.map((chat) => {
+        if (chat.id === activeChatID) {
+          return { ...chat, description: aiResponse };
+        }
+        return chat;
+      })
+    );
     setResponse('');
     setQuery('');
   }
@@ -263,12 +273,12 @@ export default function ChatPage({ user }: ChatPageProps) {
     Sentry.setTag('projectId', projectId);
     user &&
       Sentry.setUser({
-      username: getFullName(user),
-      email: user.email,
-    });
+        username: getFullName(user),
+        email: user.email,
+      });
     const threads = await fetchThreads(projectId);
     setChatHistory([
-      { id: 'new-chat', title: 'New Chat', display: false, project: projectId },
+      { id: 'new-chat', title: 'New Chat', display: false, project: projectId, created_at: '', description: ''},
       ...threads.map((thread) => ({
         ...thread,
         display: true,
@@ -303,6 +313,8 @@ export default function ChatPage({ user }: ChatPageProps) {
       id: active.id,
       title: active.title,
       project: active.project,
+      created_at: active.created_at,
+      description: active.description,
     });
     if (activeChatID === 'new-chat') {
       setMessages([]);
@@ -311,6 +323,14 @@ export default function ChatPage({ user }: ChatPageProps) {
       !isNewThread.current &&
         fetchMessages(active.id).then((messages) => {
           setMessages(messages);
+          setChatHistory((history) =>
+            history.map((chat) => {
+              if (chat.id === activeChatID && messages.length > 0) {
+                return { ...chat, description: messages.at(-1).content };
+              }
+              return chat;
+            })
+          );
         });
     }
   }, [activeChatID]);
@@ -332,9 +352,10 @@ export default function ChatPage({ user }: ChatPageProps) {
         active={activeChatID}
         activateChat={setActiveChatID}
         setVisible={setShowSidebar}
+        setHistory={setChatHistory}
       />
       {/* Navbar */}
-<nav className="flex items-center justify-between p-4 border-b border-gray-300 text-black shadow-lg">
+      <nav className="flex items-center justify-between p-4 border-b border-gray-300 text-black shadow-lg">
         <button
           onClick={() => setShowSidebar(true)}
           title="Menu"
@@ -380,7 +401,7 @@ export default function ChatPage({ user }: ChatPageProps) {
           msgRef={tempAIMessageRef}
         />
       </div>
-<PromptInput
+      <PromptInput
         sendQuery={handleSend}
         stopGenerating={() => {}}
         input={input}

@@ -33,6 +33,8 @@ export function addHandler(
 export type ChatInfo = {
   thread_id: string;
   thread_title: string;
+  thread_created_at: string;
+  thread_description: string;
   query_id: string;
   response_id: string;
 };

@@ -6,6 +6,7 @@ import { FiEdit } from 'react-icons/fi';
 import { MdClose } from "react-icons/md";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { TimeAgo } from './utils';
+import { getAccessToken } from '../utils';
 
 const API_URL = environ.API_URL;
 const USER_DEFAULT_IMAGE = environ.USER_DEFAULT_IMAGE;
@@ -15,7 +16,7 @@ export type Thread = {
   title: string;
   project: string;
   created_at: string;
-  description?: string;
+  description: string;
 };
 
 export interface ChatHistoryDisplay extends Thread {
@@ -24,35 +25,135 @@ export interface ChatHistoryDisplay extends Thread {
 
 interface ChatHistoryProps extends ChatHistoryDisplay {
   activateChat: (id: string) => void;
+  deleteChat: (id: string) => void;
+  editChat: (id: string, data: {title: string}) => void;
 }
 
-function ChatHistory(props: ChatHistoryProps & { active: boolean }) {
+
+async function editChat(id: string, data: {title: string}): Promise<Thread> {
+  const accessToken = await getAccessToken();
+  try {
+    const response = await fetch(`${API_URL}/chat/threads/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function deleteChat(id: string): Promise<void> {
+  const accessToken = await getAccessToken();
+  try {
+    const response = await fetch(`${API_URL}/chat/threads/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+function ChatHistory({
+  id,
+  activateChat,
+  title,
+  created_at,
+  description,
+  deleteChat,
+  editChat,
+}: ChatHistoryProps & { active: boolean }) {
+
+  const [editing, setEditing] = React.useState(false);
+  const [chatTitle, setTitle] = React.useState(title);
+  const titleInputRef = React.useRef<HTMLInputElement>(null);
+
+  function startEditing() {
+    setEditing(true);
+    setTimeout(() => titleInputRef.current?.focus(), 100);
+  }
+
+  function finishEditing() {
+    setEditing(false);
+    if (chatTitle !== title) {
+      if (chatTitle.trim().length) {
+        editChat(id, { title: chatTitle });
+      } else {
+        setTitle(title);
+      }
+    }
+  }
+
   return (
     <div
       className="flex w-full flex-col p-2 group/chat my-0 hover:bg-slate-200 border-t group-first:border-t-0  border-gray-200"
-      onClick={() => props.activateChat(props.id)}
+      onClick={() => activateChat(id)}
     >
       <div className="flex justify-between items-start">
-        <h1 className="text-sm font-medium capitalize text-black whitespace-nowrap max-w-[65%] overflow-hidden text-ellipsis">
-          {props.title}
-        </h1>
+        {editing ? (
+          <input
+            ref={titleInputRef}
+            value={chatTitle}
+            onChange={(e) => setTitle(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            className="border border-blue-400 rounded-sm text-sm"
+            onBlur={finishEditing}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                finishEditing();
+              }
+            }}
+          />
+        ) : (
+          <h1
+            className="text-sm font-medium text-black whitespace-nowrap max-w-[65%] overflow-hidden text-ellipsis"
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              startEditing();
+            }}
+          >
+            {chatTitle}
+          </h1>
+        )}
         <p className="text-xs text-gray-500">
-          <TimeAgo date={props.created_at} />
+          <TimeAgo date={created_at} />
         </p>
       </div>
       <div className="flex items-start justify-between">
         <p className="text-xs text-gray-500 whitespace-nowrap max-w-full overflow-hidden text-ellipsis">
-          {props.description || 'Hello'}
+          {description}
         </p>
         <div className="flex items-start">
           <button
             title="Edit Title"
+            onClick={(e) => {
+              e.stopPropagation();
+              startEditing();
+            }}
+            disabled={editing}
             className="text-xs hidden group-hover/chat:block text-gray-500 hover:text-blue-500"
           >
             <MdEdit className="w-4 h-4" />
           </button>
           <button
             title="Delete Chat"
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteChat(id);
+            }}
             className="text-xs hidden group-hover/chat:block text-gray-500 hover:text-red-500"
           >
             <MdDelete className="w-4 h-4" />
@@ -81,6 +182,7 @@ type SideBarProps = {
   onClose: () => void;
   activateChat: (id: string) => void;
   history: ChatHistoryDisplay[];
+  setHistory: React.Dispatch<React.SetStateAction<ChatHistoryDisplay[]>>;
 };
 
 export default function SideBar({
@@ -90,9 +192,34 @@ export default function SideBar({
   active,
   activateChat,
   setVisible,
+  setHistory,
 }: SideBarProps) {
 
   const sidebarRef = React.useRef<HTMLDivElement>(null);
+
+
+  function handleEditChat(id: string, data: {title: string}) {
+    editChat(id, data).then((thread) => {
+      setHistory((history) =>
+        history.map((t) => (t.id === thread.id ? { ...t, ...thread } : t))
+      );
+    });
+  }
+
+  function handleDeleteChat(id: string) {
+    deleteChat(id).then(() => {
+      setHistory((history) => history.filter((t) => t.id !== id));
+    });
+    if (active === id) {
+      activateChat('new-chat');
+    }
+  }
+
+  function handleActivateChat(id: string) {
+    setVisible(false);
+    activateChat(id);
+  }
+
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -103,6 +230,9 @@ export default function SideBar({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+
+
   return (
     <div
     style={{ display: visible ? 'block' : 'none' }}
@@ -129,16 +259,27 @@ export default function SideBar({
           </button>
         </div>
         {/* Previous chats container */}
-        <div className="h-[80vh] space-y-4 overflow-y-auto border-b border-gray-500 px-2 py-4">
-          {history.map((thread, index) => (thread.display ? (
+        <div className="h-[80vh] placeholder:backdrop:mt-6">
+          <div className="text-center text-black text-lg font-bold mb-2">
+            Chat History
+            {' '}
+            <span className='font-normal text-gray-600'>({history.length})</span>
+          </div>
+          <div className='overflow-y-auto h-full w-full'>
+            {history.map((thread, index) =>
+              thread.display ? (
                 <ChatHistory
                   key={index}
                   {...thread}
                   active={thread.id === active}
-              activateChat={activateChat}
+                  activateChat={handleActivateChat}
+                  deleteChat={handleDeleteChat}
+                  editChat={handleEditChat}
                 />
+
               ) : null
-          ))}
+            )}
+          </div>
         </div>
         <div className="flex items-start justify-between mt-auto w-full mb-2">
           <div className="flex items-start justify-start">

@@ -151,7 +151,7 @@ export default function PromptInput({
             target="_blank"
             rel="noopener noreferrer"
             href={((): string => {
-              const name = getFullName(userInfo.current);
+              const name = userInfo.current ? getFullName(userInfo.current) : '';
               const id = userInfo.current?.email;
               return `https://oobv13emqx4.typeform.com/to/t7Ls8WMm#user_id=${id}&name=${name}`;
             })()}

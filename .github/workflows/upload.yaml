@@ -1,4 +1,4 @@
-name: Build & Upload Extension
+name: Release Extension
 
 on:
   workflow_dispatch:
@@ -34,9 +34,9 @@ jobs:
       - name: Build Extension
         run: |
           npm install -D
+          npm install -D webpack-cli
           npm run build
           npm run pack
-
         env:
           NODE_ENV: production
           SENTRY_ENABLED: true

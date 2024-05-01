@@ -10,6 +10,8 @@ import {
 } from 'react-icons/io5';
 import { CgReadme } from 'react-icons/cg';
 import { HoverableIcon } from './utils';
+import { getUserInfo, UserInfo } from '../utils';
+import { getFullName } from '../utils';
 
 
 type PromptInputProps = {
@@ -31,6 +33,15 @@ export default function PromptInput({
   setGenerating,
   setShowSidebar,
 }: PromptInputProps) {
+
+  const userInfo = React.useRef<UserInfo>();
+
+  React.useEffect(() => {
+    getUserInfo().then((info) => {
+      userInfo.current = info;
+    });
+  }, []);
+
   return (
     <div
       className="w-full pt-2 md:pt-0 dark:border-white/20 md:border-transparent md:dark:border-transparent md:w-[calc(100%-.5rem)]"
@@ -90,33 +101,67 @@ export default function PromptInput({
       </form>
       <div className="flex w-full py-3 relative max-w-[790px] items-center justify-between px-4 mx-auto">
         <div className="w-full">
-          <button className='flex text-secondary' onClick={() => setShowSidebar((current) => !current)}>
+          <button
+            className="flex text-secondary"
+            onClick={() => setShowSidebar((current) => !current)}
+          >
             <RiHistoryLine className="w-5 h-5" />
             <span className="ml-2 font-semibold">Chat History</span>
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <button title='Documentation' className='hover:text-secondary'>
+          <a
+            title="Documentation"
+            className="hover:text-secondary"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://docs.alexis.futurdevs.tech"
+          >
             <CgReadme className="w-4 h-4" />
-          </button>
-          <button title='Give us a 5-star' className='hover:text-red-500'>
+          </a>
+          <a
+            title="Give us a 5-star"
+            className="hover:text-red-500"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://chromewebstore.google.com/detail/alexis/bcdcedchebekmpdhodipimoikhoblgfa"
+          >
             <HoverableIcon
               icon={FaRegHeart}
               props={{ className: 'w-3 h-3' }}
-              hoverIcon={FaHeart}/>
-          </button>
-          <button title='Get Help' className='hover:text-primary'>
+              hoverIcon={FaHeart}
+            />
+          </a>
+          <a
+            title="Get Help"
+            className="hover:text-primary"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="mailto:futurdevsalexis@gmail.com?subject=Help%20for%20Alexis"
+          >
             <HoverableIcon
               icon={IoHelpCircleOutline}
               props={{ className: 'w-4 h-4' }}
-              hoverIcon={IoHelpCircle}/>
-          </button>
-          <button title='Feedback' className='hover:text-primary'>
+              hoverIcon={IoHelpCircle}
+            />
+          </a>
+          <a
+            title="Feedback"
+            className="hover:text-primary"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={((): string => {
+              const name = getFullName(userInfo.current);
+              const id = userInfo.current?.email;
+              return `https://oobv13emqx4.typeform.com/to/t7Ls8WMm#user_id=${id}&name=${name}`;
+            })()}
+          >
             <HoverableIcon
               icon={IoMailOutline}
               props={{ className: 'w-4 h-4' }}
-              hoverIcon={IoMail}/>
-          </button>
+              hoverIcon={IoMail}
+            />
+          </a>
         </div>
       </div>
     </div>

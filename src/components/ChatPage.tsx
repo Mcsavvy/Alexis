@@ -1,28 +1,25 @@
 import * as React from 'react';
-import { FiSidebar } from 'react-icons/fi';
-import { CgSpinner } from 'react-icons/cg';
-import { LuArrowUpSquare } from 'react-icons/lu';
-// import { FiThumbsUp, FiThumbsDown, FiSidebar } from 'react-icons/fi';
-// import { MdContentCopy } from 'react-icons/md';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
-import { UserInfo, environ, getAccessToken, getUserInfo } from '../utils';
+import { UserInfo, environ, getAccessToken } from '../utils';
 import Markdown, { Components } from 'react-markdown';
-import TextareaAutosize from 'react-textarea-autosize';
 import { saveCurrentThread } from '../utils';
 import { getCurrentThread } from '../utils';
 import socket, { SocketIO, ChatInfo, addHandler } from './Socket';
 import * as Sentry from '@sentry/react';
 import { getFullName } from '../utils';
 import { getProfilePicture } from '../utils';
+import PromptInput from './PromptInput';
+import { FiEdit } from "react-icons/fi";
+import { getVersion } from '../utils';
+import { CgMenuLeftAlt } from 'react-icons/cg';
 
 const API_URL = environ.API_URL;
 const INTRANET_ORIGIN = environ.INTRANET_ORIGIN;
 
 const Components: Components = {
   a: ({ node, href, ...props }) => {
-    const url = new URL(href);
-    if (url.origin === 'https://rltoken') {
-      href = INTRANET_ORIGIN + '/rltoken' + url.pathname;
+    if (href.startsWith('/')) {
+      href = INTRANET_ORIGIN + href;
     }
     return <a href={href} {...props} target="_blank" />;
   },
@@ -41,13 +38,13 @@ interface AIMessageProps extends BaseMessageProps {}
 
 export function HumanMessage({ message, picture, msgRef }: HumanMessageProps) {
   return message.content ? (
-    <div className="flex flex-row px-4 py-8 sm:px-6" ref={msgRef}>
+    <div className="flex flex-row bg-white mt-8 py-2" ref={msgRef}>
       <img
-        className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
+        className="mr-2 flex h-5 w-5 rounded-full mt-1 border border-gray-300"
         src={picture}
       />
-
-      <div className="flex max-w-3xl items-center">
+      <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
+        <h5 className="font-bold">You</h5>
         <Markdown className="chat-message human-chat" components={Components}>
           {message.content}
         </Markdown>
@@ -56,15 +53,15 @@ export function HumanMessage({ message, picture, msgRef }: HumanMessageProps) {
   ) : null;
 }
 
-export function AIMessage({ message, msgRef}: AIMessageProps) {
+export function AIMessage({ message, msgRef }: AIMessageProps) {
   return message.content ? (
-    <div className="flex bg-white px-4 py-8 sm:px-6" ref={msgRef}>
+    <div className="flex flex-row bg-white mt-8 py-2" ref={msgRef}>
       <img
-        className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
+        className="mr-2 flex h-5 w-5 rounded-full mt-1 border border-gray-300"
         src="/icons/icon48.png"
       />
-
       <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
+        <h5 className='font-bold'>Alexis</h5>
         <Markdown
           className="max-w-3xl chat-message ai-chat"
           components={Components}
@@ -72,13 +69,13 @@ export function AIMessage({ message, msgRef}: AIMessageProps) {
           {message.content}
         </Markdown>
         {/* <div className="mt-4 flex flex-row justify-start gap-x-2 text-slate-500 lg:mt-0">
-          <button className="hover:text-light-primary">
+          <button className="hover:text-alx-red">
             <FiThumbsUp />
           </button>
-          <button className="hover:text-light-primary" type="button">
+          <button className="hover:text-alx-red" type="button">
             <FiThumbsDown />
           </button>
-          <button className="hover:text-light-primary" type="button">
+          <button className="hover:text-alx-red" type="button">
             <MdContentCopy />
           </button>
         </div> */}
@@ -132,7 +129,7 @@ type ChatMessage = {
 
 type ChatPageProps = {
   user?: UserInfo;
-}
+};
 
 export default function ChatPage({ user }: ChatPageProps) {
   const [project, setProject] = React.useState('');
@@ -191,7 +188,7 @@ export default function ChatPage({ user }: ChatPageProps) {
   }
 
   function handleChatInfo(info: ChatInfo) {
-    tempHumanMessageRef.current?.scrollIntoView({behavior: "smooth"});
+    tempHumanMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     Sentry.withScope((scope) => {
       scope.setTransactionName('handleChatInfo');
       console.log('Got chat info:', info);
@@ -201,6 +198,8 @@ export default function ChatPage({ user }: ChatPageProps) {
           id: info.thread_id,
           title: info.thread_title,
           project: project,
+          created_at: info.thread_created_at,
+          description: info.thread_description,
         };
         setActiveChatID(thread.id);
         setChatHistory((history) => [
@@ -223,7 +222,7 @@ export default function ChatPage({ user }: ChatPageProps) {
     });
     if (responseTokenCountRef.current % 20 == 0) {
       // scroll into view after every 20 tokens
-      tempAIMessageRef.current?.scrollIntoView({behavior: "smooth"})
+      tempAIMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -237,12 +236,20 @@ export default function ChatPage({ user }: ChatPageProps) {
       { id: queryIdRef.current, content: humanQuery, type: 'human' },
       { id: responseIdRef.current, content: aiResponse, type: 'ai' },
     ]);
+    setChatHistory((history) =>
+      history.map((chat) => {
+        if (chat.id === activeChatID) {
+          return { ...chat, description: aiResponse };
+        }
+        return chat;
+      })
+    );
     setResponse('');
     setQuery('');
   }
 
-  function handleSend() {
-    const msg = input.trim();
+  function handleSend(msg: string) {
+    msg = msg.trim();
     if (!msg) return;
     setQuery(msg);
     setInput('');
@@ -264,13 +271,14 @@ export default function ChatPage({ user }: ChatPageProps) {
     const projectId = url.pathname.match(/^\/projects\/(\d+)/)[1];
     setProject(projectId);
     Sentry.setTag('projectId', projectId);
-    user && Sentry.setUser({
-      username: getFullName(user),
-      email: user.email,
-    });
+    user &&
+      Sentry.setUser({
+        username: getFullName(user),
+        email: user.email,
+      });
     const threads = await fetchThreads(projectId);
     setChatHistory([
-      { id: 'new-chat', title: 'New Chat', display: false, project: projectId },
+      { id: 'new-chat', title: 'New Chat', display: false, project: projectId, created_at: '', description: ''},
       ...threads.map((thread) => ({
         ...thread,
         display: true,
@@ -305,6 +313,8 @@ export default function ChatPage({ user }: ChatPageProps) {
       id: active.id,
       title: active.title,
       project: active.project,
+      created_at: active.created_at,
+      description: active.description,
     });
     if (activeChatID === 'new-chat') {
       setMessages([]);
@@ -313,6 +323,14 @@ export default function ChatPage({ user }: ChatPageProps) {
       !isNewThread.current &&
         fetchMessages(active.id).then((messages) => {
           setMessages(messages);
+          setChatHistory((history) =>
+            history.map((chat) => {
+              if (chat.id === activeChatID && messages.length > 0) {
+                return { ...chat, description: messages.at(-1).content };
+              }
+              return chat;
+            })
+          );
         });
     }
   }, [activeChatID]);
@@ -333,25 +351,31 @@ export default function ChatPage({ user }: ChatPageProps) {
         onClose={() => setShowSidebar(false)}
         active={activeChatID}
         activateChat={setActiveChatID}
+        setVisible={setShowSidebar}
+        setHistory={setChatHistory}
       />
       {/* Navbar */}
-      <nav className="flex items-center justify-between p-4 bg-slate-100 text-black shadow-lg">
-        <div className="flex items-center">
-          <img src="/icons/icon48.png" alt="Logo" className="mr-2 h-8 w-8" />{' '}
-          <h1 className="text-lg font-medium text-light-text">
-            {activeThread ? activeThread.title : 'Loading...'}
-          </h1>{' '}
-        </div>
+      <nav className="flex items-center justify-between p-4 border-b border-gray-300 text-black shadow-lg">
         <button
-          onClick={() => setShowSidebar(!showSidebar)}
-          className=" hover:text-light-primary"
+          onClick={() => setShowSidebar(true)}
+          title="Menu"
+          className="text-black"
         >
-          <FiSidebar className="w-5 h-5" />
+          <CgMenuLeftAlt className="w-6 h-6" />
+        </button>
+        <h1 className="text-xl font-medium text-black">
+          Alexis{' '}
+          <span className="text-gray-600">
+            {getVersion().split('.').slice(0, 2).join('.')}
+          </span>
+        </h1>
+        <button onClick={() => setActiveChatID('new-chat')} title="New Chat">
+          <FiEdit className="w-5 h-5 hover:text-primary text-black" />
         </button>
       </nav>
 
       {/* Prompt Messages */}
-      <div className="flex-1 overflow-y-auto pb-20 bg-light-panel text-sm leading-6 text-slate-900 shadow-md sm:text-base sm:leading-7">
+      <div className="flex-1 overflow-y-auto pb-2 p-2 bg-white text-sm leading-6 text-slate-900 sm:text-base sm:leading-7">
         {messages.map((msg, index) =>
           msg.type === 'human' ? (
             <HumanMessage
@@ -377,50 +401,15 @@ export default function ChatPage({ user }: ChatPageProps) {
           msgRef={tempAIMessageRef}
         />
       </div>
-
-      {/* Prompt message input */}
-      <form className="fixed bottom-0 left-0 right-0  flex w-full items-end rounded-b-md border-t border-slate-300 bg-slate-200 p-2">
-        <label htmlFor="chat" className="sr-only">
-          Enter your prompt
-        </label>
-        <TextareaAutosize
-          id="chat"
-          value={input}
-          readOnly={typing}
-          onChange={(e) => setInput(e.target.value)}
-          className="flex-1 min-h-full w-full rounded-md border border-slate-300 bg-slate-50 p-2 text-base text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
-          placeholder={
-            activeThread
-              ? activeThread.id == 'new-chat'
-                ? `What's on your mind?`
-                : `Talking about ${activeThread.title}`
-              : 'Ready to chat?'
-          }
-          // send message on ctrl+enter
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-        />
-        <div>
-          <button
-            disabled={!input || typing}
-            onClick={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="inline-flex sm:p-2"
-          >
-            {typing ? (
-              <CgSpinner className="animate-spin h-8 w-8 text-light-primary" />
-            ) : (
-              <LuArrowUpSquare className="w-8 h-8" />
-            )}
-          </button>
-        </div>
-      </form>
+      <PromptInput
+        sendQuery={handleSend}
+        stopGenerating={() => {}}
+        input={input}
+        setInput={setInput}
+        generating={typing}
+        setGenerating={setTyping}
+        setShowSidebar={setShowSidebar}
+      />
     </div>
   );
 }

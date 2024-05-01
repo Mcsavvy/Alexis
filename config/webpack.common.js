@@ -10,7 +10,8 @@ const { EnvValidatePlugin } = require('./plugins');
 
 const enableSentry = process.env.SENTRY_ENABLED === 'true';
 const version = require('../package.json').version;
-const nodeEnv = process.env.NODE_ENV;
+const environ = dotenvConfig().parsed;
+const nodeEnv = environ.NODE_ENV;
 
 /**
  * Transform the manifest.json file
@@ -21,9 +22,9 @@ const nodeEnv = process.env.NODE_ENV;
 function transformManifest(mode, content) {
   const manifest = JSON.parse(content.toString());
   manifest.version = version;
-  if (nodeEnv === 'development') {
+  if (nodeEnv == 'development') {
     // Development mode
-    if (mode === 'development') {
+    if (mode == 'development') {
       // watch mode
       manifest.name += '(dev)';
     } else {
@@ -32,7 +33,7 @@ function transformManifest(mode, content) {
     }
   } else {
     // Production mode
-    if (mode.includes('development')) {
+    if (mode == 'development') {
       // watch mode
       manifest.name += '(staging)';
     } else {
@@ -122,7 +123,7 @@ const common = (env, argv) => ({
         {
           from: PATHS.manifest,
           to: PATHS.build + '/manifest.json',
-          transform: transformManifest.bind(null, [env]),
+          transform: transformManifest.bind(null, argv.mode),
         },
       ],
     }),
@@ -131,9 +132,9 @@ const common = (env, argv) => ({
       filename: '[name].css',
     }),
     // .env variables
-    new DefinePlugin({ 'process.env': JSON.stringify(dotenvConfig().parsed) }),
+    new DefinePlugin({ 'process.env': JSON.stringify(environ) }),
     sentryWebpackPlugin({
-      authToken: process.env.SENTRY_AUTH_TOKEN,
+      authToken: environ.SENTRY_AUTH_TOKEN,
       org: 'futurdevs',
       project: 'alexis-ui',
       telemetry: false,

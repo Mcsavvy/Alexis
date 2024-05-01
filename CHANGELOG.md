@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2024-05-01
+
+### 🚀 Features
+
+- Update NODE_ENV in release and upload workflows
+
+### 🐛 Bug Fixes
+
+- Fix issue with rendering markdown containing links
+
+### 🚜 Refactor
+
+- Update app colour
+- Moved prompt input to eparate component
+- Added 'new chat ' button on main view
+
+### 🎨 Styling
+
+- Restyle navbar
+- Restyled chat messages display
+- Restyle sidebar header and footer
+- Restyled chat messages display
+- Restyled sidebar
+
+### ⚙️  Miscellaneous Tasks
+
+- Styled scrollbar
+- Update colors
+- Added HoverableIcon component
+- Style textarea for user input
+- Add getVersion function to utils
+- Add component to display relative time
+
 ## [0.3.10] - 2024-04-02
 
 ### ⚙️  Miscellaneous Tasks

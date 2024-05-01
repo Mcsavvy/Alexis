@@ -175,3 +175,10 @@ export function getProfilePicture(userInfo) {
   if (userInfo.picture) return userInfo.picture;
   return environ.USER_DEFAULT_IMAGE;
 }
+
+/**
+ * @returns {string}
+ */
+export function getVersion() {
+  return chrome.runtime.getManifest().version
+}

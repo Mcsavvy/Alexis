@@ -38,13 +38,13 @@ interface AIMessageProps extends BaseMessageProps {}
 
 export function HumanMessage({ message, picture, msgRef }: HumanMessageProps) {
   return message.content ? (
-    <div className="flex flex-row px-4 py-8 sm:px-6" ref={msgRef}>
+    <div className="flex flex-row bg-white mt-8 py-2" ref={msgRef}>
       <img
-        className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
+        className="mr-2 flex h-5 w-5 rounded-full mt-1 border border-gray-300"
         src={picture}
       />
-
-      <div className="flex max-w-3xl items-center">
+  <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
+        <h5 className="font-bold">You</h5>
         <Markdown className="chat-message human-chat" components={Components}>
           {message.content}
         </Markdown>
@@ -53,15 +53,15 @@ export function HumanMessage({ message, picture, msgRef }: HumanMessageProps) {
   ) : null;
 }
 
-export function AIMessage({ message, msgRef}: AIMessageProps) {
+export function AIMessage({ message, msgRef }: AIMessageProps) {
   return message.content ? (
-    <div className="flex bg-white px-4 py-8 sm:px-6" ref={msgRef}>
+    <div className="flex flex-row bg-white mt-8 py-2" ref={msgRef}>
       <img
-        className="mr-2 flex h-8 w-8 rounded-full sm:mr-4"
+        className="mr-2 flex h-5 w-5 rounded-full mt-1 border border-gray-300"
         src="/icons/icon48.png"
       />
-
-      <div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
+<div className="flex w-full flex-col items-start lg:flex-row lg:justify-between">
+<h5 className='font-bold'>Alexis</h5>
         <Markdown
           className="max-w-3xl chat-message ai-chat"
           components={Components}
@@ -188,7 +188,7 @@ export default function ChatPage({ user }: ChatPageProps) {
   }
 
   function handleChatInfo(info: ChatInfo) {
-    tempHumanMessageRef.current?.scrollIntoView({behavior: "smooth"});
+    tempHumanMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     Sentry.withScope((scope) => {
       scope.setTransactionName('handleChatInfo');
       console.log('Got chat info:', info);
@@ -220,7 +220,7 @@ export default function ChatPage({ user }: ChatPageProps) {
     });
     if (responseTokenCountRef.current % 20 == 0) {
       // scroll into view after every 20 tokens
-      tempAIMessageRef.current?.scrollIntoView({behavior: "smooth"})
+      tempAIMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -238,8 +238,8 @@ export default function ChatPage({ user }: ChatPageProps) {
     setQuery('');
   }
 
-  function handleSend() {
-    const msg = input.trim();
+  function handleSend(msg: string) {
+    msg = msg.trim();
     if (!msg) return;
     setQuery(msg);
     setInput('');
@@ -261,7 +261,8 @@ export default function ChatPage({ user }: ChatPageProps) {
     const projectId = url.pathname.match(/^\/projects\/(\d+)/)[1];
     setProject(projectId);
     Sentry.setTag('projectId', projectId);
-    user && Sentry.setUser({
+    user &&
+      Sentry.setUser({
       username: getFullName(user),
       email: user.email,
     });

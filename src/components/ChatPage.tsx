@@ -352,7 +352,7 @@ export default function ChatPage({ user }: ChatPageProps) {
       </nav>
 
       {/* Prompt Messages */}
-      <div className="flex-1 overflow-y-auto pb-2 bg-white text-sm leading-6 text-slate-900 sm:text-base sm:leading-7">
+      <div className="flex-1 overflow-y-auto pb-2 p-2 bg-white text-sm leading-6 text-slate-900 sm:text-base sm:leading-7">
         {messages.map((msg, index) =>
           msg.type === 'human' ? (
             <HumanMessage

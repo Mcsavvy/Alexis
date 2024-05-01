@@ -1,9 +1,7 @@
 import * as React from 'react';
-import { FiSidebar } from 'react-icons/fi';
 import SideBar, { Thread, ChatHistoryDisplay } from './SideBar';
-import { UserInfo, environ, getAccessToken, getUserInfo } from '../utils';
+import { UserInfo, environ, getAccessToken } from '../utils';
 import Markdown, { Components } from 'react-markdown';
-import TextareaAutosize from 'react-textarea-autosize';
 import { saveCurrentThread } from '../utils';
 import { getCurrentThread } from '../utils';
 import socket, { SocketIO, ChatInfo, addHandler } from './Socket';
@@ -11,6 +9,9 @@ import * as Sentry from '@sentry/react';
 import { getFullName } from '../utils';
 import { getProfilePicture } from '../utils';
 import PromptInput from './PromptInput';
+import { FiEdit } from "react-icons/fi";
+import { getVersion } from '../utils';
+import { CgMenuLeftAlt } from 'react-icons/cg';
 
 const API_URL = environ.API_URL;
 const INTRANET_ORIGIN = environ.INTRANET_ORIGIN;
@@ -331,9 +332,20 @@ export default function ChatPage({ user }: ChatPageProps) {
         activateChat={setActiveChatID}
       />
       {/* Navbar */}
-      <nav className="flex items-center justify-between p-4 border-b border-gray-500 text-black shadow-lg">
-          <img src="/icons/icon48.png" alt="Logo" className="mr-2 h-8 w-8" />{' '}
-        <h1 className="text-lg font-medium text-black">
+<nav className="flex items-center justify-between p-4 border-b border-gray-300 text-black shadow-lg">
+        <button
+          onClick={() => setShowSidebar(true)}
+          title="Menu"
+          className="text-black"
+        >
+          <CgMenuLeftAlt className="w-6 h-6" />
+        </button>
+        <h1 className="text-xl font-medium text-black">
+          Alexis{' '}
+          <span className="text-gray-600">
+            {getVersion().split('.').slice(0, 2).join('.')}
+          </span>
+        </h1>
         <button onClick={() => setActiveChatID('new-chat')} title="New Chat">
           <FiEdit className="w-5 h-5 hover:text-primary text-black" />
         </button>

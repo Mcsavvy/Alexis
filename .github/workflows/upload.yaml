@@ -29,10 +29,11 @@ jobs:
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env
           echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
           echo "NODE_ENV=production" >> .env
+          echo "SENTRY_ENABLED=true" >> .env
 
       - name: Build Extension
         run: |
-          npm install
+          npm install -D
           npm run build
           npm run pack
 

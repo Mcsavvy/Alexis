@@ -263,7 +263,7 @@ export default function SideBar({
           <div className="text-center text-black text-lg font-bold mb-2">
             Chat History
             {' '}
-            <span className='font-normal text-gray-600'>({history.length})</span>
+            <span className='font-normal text-gray-600'>({history.filter(thread => thread.display).length})</span>
           </div>
           <div className='overflow-y-auto h-full w-full'>
             {history.map((thread, index) =>

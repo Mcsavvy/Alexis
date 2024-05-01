@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2024-05-01
+
+### 🚀 Features
+
+- Update alexis images
+
+### 🚜 Refactor
+
+- Add links for icons below prompt input
+
+### ⚙️  Miscellaneous Tasks
+
+- Chat count exclude new-chat
+
 ## [0.4.0] - 2024-05-01
 
 ### 🚀 Features
